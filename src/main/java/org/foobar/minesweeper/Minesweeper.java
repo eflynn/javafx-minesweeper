@@ -6,8 +6,6 @@ package org.foobar.minesweeper;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
-import java.util.EnumMap;
-import java.util.Map;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
@@ -24,13 +22,13 @@ import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
 import org.foobar.minesweeper.event.BoardChangeEvent;
 import org.foobar.minesweeper.event.CellChangeEvent;
+import org.foobar.minesweeper.model.Minefield;
 import org.foobar.minesweeper.model.SquareType;
 import static org.foobar.minesweeper.model.SquareType.BLANK;
 import static org.foobar.minesweeper.model.SquareType.FLAG;
 import static org.foobar.minesweeper.model.SquareType.HITMINE;
 import static org.foobar.minesweeper.model.SquareType.MINE;
 import static org.foobar.minesweeper.model.SquareType.WRONGMINE;
-import org.foobar.minesweeper.model.Minefield;
 
 /**
  *
@@ -45,18 +43,9 @@ public class Minesweeper extends Application {
             VBoxBuilder.create().children(newGameButton, canvas).build();
     private final EventBus eventBus = new EventBus();
     private Minefield field = new Minefield(eventBus);
-    private static final Map<SquareType, Integer> tileMap = new EnumMap<>(SquareType.class);
     private final GraphicsContext context = canvas.getGraphicsContext2D();
     private int lastRow = -1;
     private int lastCol = -1;
-
-    static {
-        tileMap.put(BLANK, 0);
-        tileMap.put(FLAG, 1);
-        tileMap.put(MINE, 2);
-        tileMap.put(HITMINE, 3);
-        tileMap.put(WRONGMINE, 4);
-    }
 
     public Minesweeper() {
         canvas.addEventHandler(MOUSE_PRESSED, new MouseHandler() {
@@ -118,6 +107,23 @@ public class Minesweeper extends Application {
         lastCol = -1;
     }
 
+    private int getTile(SquareType type) {
+        switch (type) {
+        case BLANK:
+            return 0;
+        case FLAG:
+            return 1;
+        case MINE:
+            return 2;
+        case HITMINE:
+            return 3;
+        case WRONGMINE:
+            return 4;
+        default:
+            throw new AssertionError("Unknown square type: " + type);
+        }
+    }
+
     private boolean isSelected() {
         return lastRow != -1;
     }
@@ -168,10 +174,10 @@ public class Minesweeper extends Application {
 
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < columns; c++) {
-                SquareType cell = field.getCellAt(r, c);
+                SquareType square = field.getSquareAt(r, c);
 
-                int tile = cell.hasMineCount()
-                        ? cell.getMineCount() + 5 : tileMap.get(cell);
+                int tile = square.hasMineCount()
+                        ? square.getMineCount() + 5 : getTile(square);
 
                 drawTile(r, c, tile);
             }
@@ -185,7 +191,7 @@ public class Minesweeper extends Application {
 
         int tile = event.getCell().hasMineCount()
                 ? event.getCell().getMineCount() + 5
-                : tileMap.get(event.getCell());
+                : getTile(event.getCell());
 
         drawTile(row, col, tile);
     }

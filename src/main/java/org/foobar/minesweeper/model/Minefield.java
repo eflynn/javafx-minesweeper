@@ -90,7 +90,7 @@ public final class Minefield {
     }
 
     public boolean canFlag(int row, int column) {
-        return !isGameOver && !getCellAt(row, column).hasMineCount();
+        return !isGameOver && !getSquareAt(row, column).hasMineCount();
     }
 
     /**
@@ -100,7 +100,7 @@ public final class Minefield {
      * @return
      */
     public boolean canReveal(int row, int column) {
-        return !isGameOver && getCellAt(row, column).isRevealable();
+        return !isGameOver && getSquareAt(row, column).isRevealable();
     }
 
     /**
@@ -127,7 +127,7 @@ public final class Minefield {
      * @param column
      * @return
      */
-    public SquareType getCellAt(int row, int column) {
+    public SquareType getSquareAt(int row, int column) {
         // TODO: check guava docs for recommended exceptions.
         checkElementIndex(row, rows, "row (%d) must not be negative");
         checkElementIndex(column, columns, "column (%d) must not be negative");
