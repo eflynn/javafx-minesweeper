@@ -1,6 +1,8 @@
-nbactions.xml
-nb-configuration.xml
 *.class
+*~
+.classpath
+.settings
+.project
 target
 
 # Package Files #
