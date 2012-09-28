@@ -128,8 +128,9 @@ public final class Minefield {
      * @return
      */
     public SquareType getSquareAt(int row, int column) {
-        checkElementIndex(row, rows);
-        checkElementIndex(column, columns);
+        // TODO: check guava docs for recommended exceptions.
+        checkElementIndex(row, rows, "row (%d) must not be negative");
+        checkElementIndex(column, columns, "column (%d) must not be negative");
 
         return table[row + 1][column + 1].getType();
     }
@@ -345,17 +346,12 @@ public final class Minefield {
         assert column > 0 && column <= columns : "invalid column: " + column;
 
         List<Entry> neighbors = new ArrayList<>(8);
-        
-        for(int c = column - 1; c <= column + 1; c++) {
-            neighbors.add(new Entry(row + 1, c, table[row + 1][c]));
+
+        for (int r = row - 1; r <= row + 1; r++) {
+            for (int c = column - 1; c <= column + 1; c++) {
+                neighbors.add(new Entry(r, c, table[r][c]));
+            }
         }
-        
-        for(int c = column - 1; c <= column + 1; c++) {
-            neighbors.add(new Entry(row - 1, c, table[row - 1][c]));
-        }
-        
-        neighbors.add(new Entry(row, column - 1, table[row][column - 1]));
-        neighbors.add(new Entry(row, column + 1, table[row][column + 1]));
 
         return neighbors;
     }
