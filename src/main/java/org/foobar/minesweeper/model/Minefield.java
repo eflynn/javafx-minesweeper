@@ -179,9 +179,9 @@ public final class Minefield {
      * @param row the row whose cell will be revealed.
      * @param column the column whose cell will be revealed.
      *
-     * @throws IndexOutOfBoundsException if (@code row} is negative or greater
+     * @throws IndexOutOfBoundsException if {@code row} is negative or greater
      * than or equal to {@code getRowCount()}
-     * @throws IndexOutOfBoundsException if (@code column) is negative or greater
+     * @throws IndexOutOfBoundsException if {@code column} is negative or greater
      * than or equal to {@code getColumnCount()}
      */
     public void reveal(int row, int column) {
@@ -205,9 +205,9 @@ public final class Minefield {
      * @param row the row whose flag will be toggled.
      * @param column the column whose flag will be toggled.
      *
-     * @throws IndexOutOfBoundsException if (@code row} is negative or greater
+     * @throws IndexOutOfBoundsException if {@code row} is negative or greater
      * than or equal to {@code getRowCount()}
-     * @throws IndexOutOfBoundsException if (@code column) is negative or greater
+     * @throws IndexOutOfBoundsException if {@code column} is negative or greater
      * than or equal to {@code getColumnCount()}
      */
     public void revealNearby(int row, int column) {
@@ -240,9 +240,9 @@ public final class Minefield {
      * @param row the row whose flag will be toggled.
      * @param column the column whose flag will be toggled.
      *
-     * @throws IndexOutOfBoundsException if (@code row} is negative or greater
+     * @throws IndexOutOfBoundsException if {@code row} is negative or greater
      * than or equal to {@code getRowCount()}
-     * @throws IndexOutOfBoundsException if (@code column) is negative or greater
+     * @throws IndexOutOfBoundsException if {@code column} is negative or greater
      * than or equal to {@code getColumnCount()}
      */
     public void toggleFlag(int row, int column) {
