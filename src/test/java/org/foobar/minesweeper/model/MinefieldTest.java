@@ -55,7 +55,7 @@ public final class MinefieldTest {
     public void testFlag() {
         field.toggleFlag(0, 0);
         
-        assertEquals(SquareType.FLAG, field.getCellAt(0, 0));
+        assertEquals(SquareType.FLAG, field.getSquareAt(0, 0));
         verify(eventBus).post(anyObject());
     }   
     
@@ -67,7 +67,7 @@ public final class MinefieldTest {
     
     @Test(expected=IndexOutOfBoundsException.class)
     public void testGet() {
-        field.getCellAt(-1, -1);
+        field.getSquareAt(-1, -1);
     }
     
     @Test(expected=IndexOutOfBoundsException.class)
