@@ -8,87 +8,85 @@ import static org.foobar.minesweeper.model.SquareType.MINE;
 import static org.foobar.minesweeper.model.SquareType.WRONGMINE;
 
 final class Square {
-	private int nearbyMines;
-	private SquareType type = SquareType.BLANK;
+  private int nearbyMines;
+  private SquareType type = SquareType.BLANK;
 
-	public Square() {
-	}
+  public Square() {}
 
-	public Square(Square cell) {
-		nearbyMines = cell.nearbyMines;
-		type = cell.type;
-	}
+  public Square(Square cell) {
+    nearbyMines = cell.nearbyMines;
+    type = cell.type;
+  }
 
-	public boolean hasNearbyMines() {
-		return nearbyMines != 0;
-	}
+  public boolean hasNearbyMines() {
+    return nearbyMines != 0;
+  }
 
-	public boolean isMine() {
-		return nearbyMines == -1;
-	}
+  public boolean isMine() {
+    return nearbyMines == -1;
+  }
 
-	public boolean isRevealable() {
-		return type == BLANK;
-	}
+  public boolean isRevealable() {
+    return type == BLANK;
+  }
 
-	public void onGameLost() {
-		if (type == HITMINE) {
-			return;
-		}
+  public void onGameLost() {
+    if (type == HITMINE) {
+      return;
+    }
 
-		if (isMine()) {
-			type = MINE;
-		} else if (type == FLAG) {
-			type = WRONGMINE;
-		}
-	}
+    if (isMine()) {
+      type = MINE;
+    } else if (type == FLAG) {
+      type = WRONGMINE;
+    }
+  }
 
-	public void incrementMineCount() {
-		if (!isMine()) {
-			nearbyMines++;
-		}
-	}
+  public void incrementMineCount() {
+    if (!isMine()) {
+      nearbyMines++;
+    }
+  }
 
-	public void setHitMine() {
-		assert isMine();
+  public void setHitMine() {
+    assert isMine();
 
-		type = HITMINE;
-	}
+    type = HITMINE;
+  }
 
-	public void setMine() {
-		assert !isMine();
+  public void setMine() {
+    assert !isMine();
 
-		nearbyMines = -1;
-	}
+    nearbyMines = -1;
+  }
 
-	public void toggleFlag() {
-		assert !type.hasMineCount();
+  public void toggleFlag() {
+    assert !type.hasMineCount();
 
-		type = (type == FLAG) ? BLANK : FLAG;
-	}
+    type = (type == FLAG) ? BLANK : FLAG;
+  }
 
-	/**
-	 * 
-	 * @return
-	 */
-	public SquareType getType() {
-		return type;
-	}
+  /**
+   * 
+   * @return
+   */
+  public SquareType getType() {
+    return type;
+  }
 
-	public void revealNumber() {
-		assert !isMine();
+  public void revealNumber() {
+    assert !isMine();
 
-		type = SquareType.of(nearbyMines);
-	}
+    type = SquareType.of(nearbyMines);
+  }
 
-	@Override
-	public String toString() {
-		return Objects.toStringHelper(this).add("type", type)
-				.add("isMine", isMine()).add("nearbyMines", nearbyMines)
-				.toString();
-	}
+  @Override
+  public String toString() {
+    return Objects.toStringHelper(this).add("type", type).add("isMine", isMine())
+        .add("nearbyMines", nearbyMines).toString();
+  }
 
-	public String debugNumbers() {
-		return isMine() ? "*" : String.valueOf(nearbyMines);
-	}
+  public String debugNumbers() {
+    return isMine() ? "*" : String.valueOf(nearbyMines);
+  }
 }
