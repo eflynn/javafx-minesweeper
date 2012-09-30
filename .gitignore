@@ -3,6 +3,7 @@
 .settings/
 target/
 *.class
+*~
 
 # Package Files #
 *.jar
