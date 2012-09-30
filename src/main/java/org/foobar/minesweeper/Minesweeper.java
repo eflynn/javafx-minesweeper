@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.foobar.minesweeper;
 
 import com.google.common.eventbus.EventBus;
@@ -32,10 +28,6 @@ import static org.foobar.minesweeper.model.SquareType.MINE;
 import static org.foobar.minesweeper.model.SquareType.WRONGMINE;
 import org.foobar.minesweeper.model.Minefield;
 
-/**
- *
- * @author User
- */
 public class Minesweeper extends Application {
     private static final int CELL = 24;
     private final Button newGameButton = new Button("New Game");

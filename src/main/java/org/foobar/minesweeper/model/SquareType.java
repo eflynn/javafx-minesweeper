@@ -1,16 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.foobar.minesweeper.model;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-/**
- *
- * @author User
- */
 public enum SquareType {
     BLANK, FLAG, MINE, HITMINE, WRONGMINE,
     ZERO(0), ONE(1), TWO(2), THREE(3), FOUR(4), 

@@ -17,10 +17,6 @@ import org.foobar.minesweeper.event.BoardChangeEvent;
 import org.foobar.minesweeper.event.CellChangeEvent;
 import static org.foobar.minesweeper.model.SquareType.FLAG;
 
-/**
- *
- * @author User
- */
 public final class Minefield {
     public enum State {
         /**
