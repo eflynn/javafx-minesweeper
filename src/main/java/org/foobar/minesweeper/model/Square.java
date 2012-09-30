@@ -7,10 +7,6 @@ import static org.foobar.minesweeper.model.SquareType.HITMINE;
 import static org.foobar.minesweeper.model.SquareType.MINE;
 import static org.foobar.minesweeper.model.SquareType.WRONGMINE;
 
-/**
- *
- * @author User
- */
 final class Square {
     private int nearbyMines;
     private SquareType type = SquareType.BLANK;
