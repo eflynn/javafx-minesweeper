@@ -1,4 +1,3 @@
-
 @ParametersAreNonnullByDefault
 package org.foobar.minesweeper.model;
 
