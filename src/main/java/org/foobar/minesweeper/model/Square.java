@@ -8,90 +8,87 @@ import static org.foobar.minesweeper.model.SquareType.MINE;
 import static org.foobar.minesweeper.model.SquareType.WRONGMINE;
 
 final class Square {
-    private int nearbyMines;
-    private SquareType type = SquareType.BLANK;
+	private int nearbyMines;
+	private SquareType type = SquareType.BLANK;
 
-    public Square() {
-    }
+	public Square() {
+	}
 
-    public Square(Square cell) {
-        nearbyMines = cell.nearbyMines;
-        type = cell.type;
-    }
-    
-    public boolean hasNearbyMines() {
-        return nearbyMines != 0;
-    }
+	public Square(Square cell) {
+		nearbyMines = cell.nearbyMines;
+		type = cell.type;
+	}
 
-    public boolean isMine() {
-        return nearbyMines == -1;
-    }
+	public boolean hasNearbyMines() {
+		return nearbyMines != 0;
+	}
 
-    public boolean isRevealable() {
-        return type == BLANK;
-    }
+	public boolean isMine() {
+		return nearbyMines == -1;
+	}
 
-    public void onGameLost() {
-        if (type == HITMINE) {
-            return;
-        }
+	public boolean isRevealable() {
+		return type == BLANK;
+	}
 
-        if (isMine()) {
-            type = MINE;
-        }
-        else if (type == FLAG) {
-            type = WRONGMINE;
-        }
-    }
+	public void onGameLost() {
+		if (type == HITMINE) {
+			return;
+		}
 
-    public void incrementMineCount() {
-        if (!isMine()) {
-            nearbyMines++;
-        }
-    }
+		if (isMine()) {
+			type = MINE;
+		} else if (type == FLAG) {
+			type = WRONGMINE;
+		}
+	}
 
-    public void setHitMine() {
-        assert isMine();
+	public void incrementMineCount() {
+		if (!isMine()) {
+			nearbyMines++;
+		}
+	}
 
-        type = HITMINE;
-    }
+	public void setHitMine() {
+		assert isMine();
 
-    public void setMine() {
-        assert !isMine();
+		type = HITMINE;
+	}
 
-        nearbyMines = -1;
-    }
+	public void setMine() {
+		assert !isMine();
 
-    public void toggleFlag() {
-        assert !type.hasMineCount();
+		nearbyMines = -1;
+	}
 
-        type = (type == FLAG) ? BLANK : FLAG;
-    }
+	public void toggleFlag() {
+		assert !type.hasMineCount();
 
-    /**
-     *
-     * @return
-     */
-    public SquareType getType() {
-        return type;
-    }
+		type = (type == FLAG) ? BLANK : FLAG;
+	}
 
-    public void revealNumber() {
-        assert !isMine();
+	/**
+	 * 
+	 * @return
+	 */
+	public SquareType getType() {
+		return type;
+	}
 
-        type = SquareType.of(nearbyMines);
-    }
-    
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("type", type)
-                .add("isMine", isMine())
-                .add("nearbyMines", nearbyMines)
-                .toString();
-    }
+	public void revealNumber() {
+		assert !isMine();
 
-    public String debugNumbers() {
-        return isMine() ? "*" : String.valueOf(nearbyMines);
-    }
+		type = SquareType.of(nearbyMines);
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this).add("type", type)
+				.add("isMine", isMine()).add("nearbyMines", nearbyMines)
+				.toString();
+	}
+
+	public String debugNumbers() {
+		return isMine() ? "*" : String.valueOf(nearbyMines);
+	}
 }
