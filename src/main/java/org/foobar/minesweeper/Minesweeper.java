@@ -167,9 +167,9 @@ public class Minesweeper extends Application {
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
         SquareType square = field.getSquareAt(r, c);
-
-        int tile = square.hasMineCount()
-            ? square.getMineCount() + 5 : getTile(square);
+        
+        int tile = (square == SquareType.NUMBER)
+            ? field.countMines(r, c) + 5 : getTile(square); 
 
         drawTile(r, c, tile);
       }
