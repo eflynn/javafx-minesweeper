@@ -3,7 +3,12 @@ package org.foobar.minesweeper.model;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ArrayTable;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Range;
+import com.google.common.collect.Table;
 import com.google.common.eventbus.EventBus;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -11,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import static java.util.EnumSet.of;
 import java.util.List;
@@ -38,7 +44,7 @@ public final class Minefield {
     WON;
   }
 
-  static class Entry {    
+  static class Entry {
     final int row;
     final int column;
     SquareType internal = SquareType.BLANK;
@@ -51,8 +57,9 @@ public final class Minefield {
     }
   }
 
-//  private static final EnumSet<State> playStates = of(State.START, State.PLAYING);
-//  private static final Logger logger = Logger.getLogger("org.foobar.minesweeper.model.minefield");
+  // private static final EnumSet<State> playStates = of(State.START, State.PLAYING);
+  // private static final Logger logger =
+  // Logger.getLogger("org.foobar.minesweeper.model.minefield");
 
   private final int rows;
   private final int columns;
@@ -79,16 +86,16 @@ public final class Minefield {
     table = new Entry[rows][columns];
 
     initialize();
-//    log();
+    // log();
   }
 
   public Minefield(EventBus eventBus) {
     this(eventBus, 10, 10, 10);
   }
 
-//  public boolean canFlag(int row, int column) {
-//    return !isGameOver && !getSquareAt(row, column).hasMineCount();
-//  }
+  // public boolean canFlag(int row, int column) {
+  // return !isGameOver && !getSquareAt(row, column).hasMineCount();
+  // }
 
   /**
    * 
@@ -206,13 +213,13 @@ public final class Minefield {
   public void revealNearby(int row, int column) {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
-    
+
     Entry entry = table[row][column];
-    
+
     if (isGameOver || entry.external == SquareType.NUMBER) {
       return;
     }
-    
+
     Iterable<Entry> neighbors = findNeighbors(row, column);
     int nearbyFlags = 0;
 
@@ -249,17 +256,15 @@ public final class Minefield {
 
     Entry entry = table[row][column];
     boolean post = true;
-    
+
     if (entry.external == SquareType.FLAG) {
       entry.external = SquareType.BLANK;
-    }
-    else if (entry.external == SquareType.BLANK) {
+    } else if (entry.external == SquareType.BLANK) {
       entry.external = SquareType.FLAG;
-    }
-    else {
+    } else {
       post = false;
     }
-    
+
     if (post) {
       eventBus.post(new SquareChangeEvent(row, column, entry.external));
     }
@@ -270,8 +275,8 @@ public final class Minefield {
     gameState = State.START;
     isGameOver = false;
 
-    for(int r=0; r < rows; r++) {
-      for(int c=0; c < columns; c++) {
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < columns; c++) {
         table[r][c] = new Entry(r, c);
       }
     }
@@ -288,17 +293,16 @@ public final class Minefield {
       e.external = SquareType.HITMINE;
       e.internal = SquareType.HITMINE;
 
-      for(Entry[] columns : table) {
-        for(Entry i : columns) {
+      for (Entry[] columns : table) {
+        for (Entry i : columns) {
           if (i.internal == SquareType.MINE) {
             e.external = SquareType.MINE;
-          }
-          else if (i.external == FLAG) {
+          } else if (i.external == FLAG) {
             e.external = SquareType.WRONGMINE;
           }
         }
       }
-      
+
       isGameOver = true;
       gameState = State.LOST;
 
@@ -326,8 +330,9 @@ public final class Minefield {
       eventBus.post(BoardChangeEvent.INSTANCE);
     }
   }
-  
-  private void addWithConstraint(Collection<Entry> collection, boolean predicate, int row, int column) {
+
+  private void addWithConstraint(Collection<Entry> collection, boolean predicate, int row,
+      int column) {
     if (predicate) {
       collection.add(table[row][column]);
     }
@@ -338,44 +343,48 @@ public final class Minefield {
     assert column >= 0 && column < columns : "invalid column: " + column;
 
     List<Entry> neighbors = new ArrayList<>(8);
-    
+
     boolean top = row > 0;
     boolean bottom = row + 1 < rows;
     boolean left = column > 0;
     boolean right = column + 1 < columns;
-    
+
     addWithConstraint(neighbors, top, row - 1, column);
     addWithConstraint(neighbors, bottom, row + 1, column);
     addWithConstraint(neighbors, left, row, column - 1);
     addWithConstraint(neighbors, right, row, column + 1);
-    
+
     // diagonals
     addWithConstraint(neighbors, top && left, row - 1, column - 1);
     addWithConstraint(neighbors, top && right, row - 1, column + 1);
     addWithConstraint(neighbors, bottom && left, row + 1, column - 1);
     addWithConstraint(neighbors, bottom && right, row + 1, column + 1);
-    
+
     return neighbors;
   }
 
-  private void plantMines(int exceptRow, int exceptColumn) {
+  private void plantMines(int row, int column) {
     List<Entry> list = new ArrayList<>(rows * columns);
 
-    for(Entry[] columns : table) {
-      for(Entry e : columns) {
-        if (e.column != exceptRow && e.row != exceptColumn) {
-          list.add(e);
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < columns; c++) {
+        if ((r < row - 1 || r > row + 1) && (c < column - 1 || c > column + 1)) {
+          list.add(table[r][c]);
         }
       }
     }
-    
+
     Collections.shuffle(list);
-//
-//    for (Entry i : list) {
-//      if (!i.cell.hasNearbyMines() || !i.cell.isMine()) {
-//        emptySquares--;
-//      }
-//    }
+
+    for (Entry i : list.subList(0, 10)) {
+      i.internal = SquareType.MINE;
+    }
+    //
+    // for (Entry i : list) {
+    // if (!i.cell.hasNearbyMines() || !i.cell.isMine()) {
+    // emptySquares--;
+    // }
+    // }
   }
 
   public int countMines(int row, int column) {
@@ -384,12 +393,12 @@ public final class Minefield {
 
     return countMines_(table[row][column]);
   }
-  
+
   private int countMines_(Entry entry) {
     if (entry.nearbyMines == -1) {
       int mines = 0;
-      
-      for(Entry e : findNeighbors(entry.row, entry.column)) {
+
+      for (Entry e : findNeighbors(entry.row, entry.column)) {
         if (e.internal == SquareType.MINE) {
           mines++;
         }
@@ -397,49 +406,49 @@ public final class Minefield {
 
       entry.nearbyMines = mines;
     }
-    
+
     return entry.nearbyMines;
   }
 
-//  private void log() {
-//    logger.addHandler(new ConsoleHandler());
-//    logger.setLevel(Level.ALL);
-//
-//    StringBuilder builder = new StringBuilder();
-//
-//    builder.append("DEBUG\n");
-//
-//    for (Square[] row : table) {
-//      for (Square cell : row) {
-//        builder.append(cell.isMine() ? '*' : '.');
-//      }
-//      builder.append("\n");
-//    }
-//
-//    logger.info(builder.toString());
-//
-//    builder = new StringBuilder();
-//
-//    for (Square[] row : table) {
-//      for (Square cell : row) {
-//        builder.append(cell.debugNumbers());
-//        builder.append(' ');
-//      }
-//      builder.append("\n");
-//    }
-//
-//    logger.info(builder.toString());
-//
-//    builder = new StringBuilder();
-//
-//    builder.append("DEBUG\n");
-//
-//    for (Square[] row : table) {
-//      for (Square cell : row) {
-//        builder.append(cell.getType().getMineCountOr(2));
-//      }
-//      builder.append("\n");
-//    }
-//    System.out.println(builder.toString());
-//  }
+  // private void log() {
+  // logger.addHandler(new ConsoleHandler());
+  // logger.setLevel(Level.ALL);
+  //
+  // StringBuilder builder = new StringBuilder();
+  //
+  // builder.append("DEBUG\n");
+  //
+  // for (Square[] row : table) {
+  // for (Square cell : row) {
+  // builder.append(cell.isMine() ? '*' : '.');
+  // }
+  // builder.append("\n");
+  // }
+  //
+  // logger.info(builder.toString());
+  //
+  // builder = new StringBuilder();
+  //
+  // for (Square[] row : table) {
+  // for (Square cell : row) {
+  // builder.append(cell.debugNumbers());
+  // builder.append(' ');
+  // }
+  // builder.append("\n");
+  // }
+  //
+  // logger.info(builder.toString());
+  //
+  // builder = new StringBuilder();
+  //
+  // builder.append("DEBUG\n");
+  //
+  // for (Square[] row : table) {
+  // for (Square cell : row) {
+  // builder.append(cell.getType().getMineCountOr(2));
+  // }
+  // builder.append("\n");
+  // }
+  // System.out.println(builder.toString());
+  // }
 }
