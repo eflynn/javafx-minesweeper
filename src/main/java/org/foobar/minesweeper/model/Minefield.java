@@ -19,7 +19,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.foobar.minesweeper.event.BoardChangeEvent;
-import org.foobar.minesweeper.event.CellChangeEvent;
+import org.foobar.minesweeper.event.SquareChangeEvent;
 import static org.foobar.minesweeper.model.SquareType.FLAG;
 
 /**
@@ -51,8 +51,8 @@ public final class Minefield {
     }
   }
 
-  private static final EnumSet<State> playStates = of(State.START, State.PLAYING);
-  private static final Logger logger = Logger.getLogger("org.foobar.minesweeper.model.minefield");
+//  private static final EnumSet<State> playStates = of(State.START, State.PLAYING);
+//  private static final Logger logger = Logger.getLogger("org.foobar.minesweeper.model.minefield");
 
   private final int rows;
   private final int columns;
@@ -207,21 +207,24 @@ public final class Minefield {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
     
-    checkState(playStates.contains(gameState) && table[row][column].external == SquareType.NUMBER);
-
+    Entry entry = table[row][column];
+    
+    if (isGameOver || entry.external == SquareType.NUMBER) {
+      return;
+    }
+    
+    Iterable<Entry> neighbors = findNeighbors(row, column);
     int nearbyFlags = 0;
 
-    Iterable<Entry> neighbors = findNeighbors(row, column);
-
     for (Entry i : neighbors) {
-      if (i.cell.getType() == FLAG) {
+      if (i.external == SquareType.FLAG) {
         nearbyFlags++;
       }
     }
 
-    if (nearbyFlags == entry.cell.getType().getMineCount()) {
+    if (nearbyFlags == countMines_(entry)) {
       for (Entry i : neighbors) {
-        if (i.cell.isRevealable()) {
+        if (i.external == SquareType.BLANK) {
           reveal(entry);
         }
       }
@@ -258,7 +261,7 @@ public final class Minefield {
     }
     
     if (post) {
-      eventBus.post(new CellChangeEvent(row, column, entry.external));
+      eventBus.post(new SquareChangeEvent(row, column, entry.external));
     }
   }
 
@@ -309,48 +312,48 @@ public final class Minefield {
       Entry pos;
 
       while ((pos = frontier.poll()) != null) {
-        
-        pos.cell.revealNumber();
+        pos.external = SquareType.NUMBER;
 
-        enqueueNearby(pos);
+        if (countMines_(pos) == 0) {
+          for (Entry value : findNeighbors(pos.row, pos.column)) {
+            if (value.external != SquareType.NUMBER) {
+              frontier.add(value);
+            }
+          }
+        }
       }
 
       eventBus.post(BoardChangeEvent.INSTANCE);
     }
   }
-
-  private void enqueueNearby(Entry pos) {
-    if (pos.nearbyMines == 0) {
-      for (Entry value : findNeighbors(pos.row, pos.column)) {
-        if (!value.cell.getType().hasMineCount()) {
-          visited.add(value);
-        }
-      }
-    }
-  }
   
-  private void addIfOK(Collection<Entry> collection, boolean predicate, int row, int column) {
+  private void addWithConstraint(Collection<Entry> collection, boolean predicate, int row, int column) {
     if (predicate) {
       collection.add(table[row][column]);
     }
   }
 
   private List<Entry> findNeighbors(int row, int column) {
-    assert row > 0 && row <= rows : "invalid row: " + row;
-    assert column > 0 && column <= columns : "invalid column: " + column;
+    assert row >= 0 && row < rows : "invalid row: " + row;
+    assert column >= 0 && column < columns : "invalid column: " + column;
 
     List<Entry> neighbors = new ArrayList<>(8);
-
-    addIfOK(neighbors, row >= 0, row - 1, column);
-    addIfOK(neighbors, row < rows, row + 1, column);
-    addIfOK(neighbors, column >= 0, row, column - 1);
-    addIfOK(neighbors, column < columns, row, column + 1);
+    
+    boolean top = row > 0;
+    boolean bottom = row + 1 < rows;
+    boolean left = column > 0;
+    boolean right = column + 1 < columns;
+    
+    addWithConstraint(neighbors, top, row - 1, column);
+    addWithConstraint(neighbors, bottom, row + 1, column);
+    addWithConstraint(neighbors, left, row, column - 1);
+    addWithConstraint(neighbors, right, row, column + 1);
     
     // diagonals
-    addIfOK(neighbors, row >= 0 && column >= 0, row - 1, column - 1);
-    addIfOK(neighbors, row >= 0 && column < columns, row - 1, column + 1);
-    addIfOK(neighbors, row < rows && column < columns, row + 1, column + 1);
-    addIfOK(neighbors, row < rows && column >= 0, row + 1, column - 1);
+    addWithConstraint(neighbors, top && left, row - 1, column - 1);
+    addWithConstraint(neighbors, top && right, row - 1, column + 1);
+    addWithConstraint(neighbors, bottom && left, row + 1, column - 1);
+    addWithConstraint(neighbors, bottom && right, row + 1, column + 1);
     
     return neighbors;
   }
@@ -367,42 +370,35 @@ public final class Minefield {
     }
     
     Collections.shuffle(list);
-
-    for (Entry i : list) {
-      if (!i.cell.hasNearbyMines() || !i.cell.isMine()) {
-        emptySquares--;
-      }
-    }
+//
+//    for (Entry i : list) {
+//      if (!i.cell.hasNearbyMines() || !i.cell.isMine()) {
+//        emptySquares--;
+//      }
+//    }
   }
 
   public int countMines(int row, int column) {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
 
-    return countMines_(row, column);
+    return countMines_(table[row][column]);
   }
   
-  private int countMines_(int row, int column) {
-    assert row > 0 && row <= rows : "invalid row: " + row;
-    assert column > 0 && column <= columns : "invalid column: " + column;
-    
-    Entry entry = table[row][column];
-    
-    if (entry.nearbyMines != -1) {
-      return entry.nearbyMines;
-    }
-    
-    int mines = 0;
-    
-    for(Entry e : findNeighbors(row, column)) {
-      if (e.internal == SquareType.MINE) {
-        mines++;
+  private int countMines_(Entry entry) {
+    if (entry.nearbyMines == -1) {
+      int mines = 0;
+      
+      for(Entry e : findNeighbors(entry.row, entry.column)) {
+        if (e.internal == SquareType.MINE) {
+          mines++;
+        }
       }
+
+      entry.nearbyMines = mines;
     }
     
-    entry.nearbyMines = mines;
-    
-    return mines;
+    return entry.nearbyMines;
   }
 
 //  private void log() {

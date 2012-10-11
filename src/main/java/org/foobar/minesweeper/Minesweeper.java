@@ -17,7 +17,7 @@ import static javafx.scene.input.MouseEvent.*;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.stage.Stage;
 import org.foobar.minesweeper.event.BoardChangeEvent;
-import org.foobar.minesweeper.event.CellChangeEvent;
+import org.foobar.minesweeper.event.SquareChangeEvent;
 import org.foobar.minesweeper.model.Minefield;
 import org.foobar.minesweeper.model.SquareType;
 import static org.foobar.minesweeper.model.SquareType.BLANK;
@@ -177,13 +177,12 @@ public class Minesweeper extends Application {
   }
 
   @Subscribe
-  public void cellUpdated(CellChangeEvent event) {
+  public void cellUpdated(SquareChangeEvent event) {
     int row = event.getRow();
     int col = event.getColumn();
 
-    int tile = event.getCell().hasMineCount()
-        ? event.getCell().getMineCount() + 5
-            : getTile(event.getCell());
+    int tile = event.getCell() == SquareType.NUMBER
+        ? field.countMines(row, col) + 5 : getTile(event.getCell()); 
 
     drawTile(row, col, tile);
   }

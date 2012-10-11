@@ -1,7 +1,9 @@
 package org.foobar.minesweeper.model;
 
 import com.google.common.eventbus.EventBus;
-import org.foobar.minesweeper.event.CellChangeEvent;
+import org.foobar.minesweeper.*;
+import org.foobar.minesweeper.event.SquareChangeEvent;
+
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,23 +34,17 @@ public final class MinefieldTest {
     
     @Test
     public void testPredicates() {
-        assertTrue(field.canFlag(0, 0));
+//        assertTrue(field.canFlag(0, 0));
         assertTrue(field.canReveal(0, 0));
         assertFalse(field.isGameOver());
     }
-    
-    @Test
-    public void testFlagAfterReveal1() {
-        field.reveal(0, 0);
-        assertFalse(field.canFlag(0, 0));
-    }
-    
+        
     public void testFlagAfterReveal2() {
         field.reveal(0, 0);
         field.toggleFlag(0, 0);
         
         verify(eventBus, times(1)).post(anyObject());
-        verify(eventBus, never()).post(isA(CellChangeEvent.class));
+        verify(eventBus, never()).post(isA(SquareChangeEvent.class));
     }
     
     @Test
