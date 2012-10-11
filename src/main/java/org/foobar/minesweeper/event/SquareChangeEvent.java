@@ -1,19 +1,19 @@
 package org.foobar.minesweeper.event;
 
-import org.foobar.minesweeper.model.SquareType;
+import org.foobar.minesweeper.model.Square;
 
 public class SquareChangeEvent {
-  private final SquareType cell;
+  private final Square cell;
   private final int row;
   private final int column;
 
-  public SquareChangeEvent(int row, int column, SquareType cell) {
+  public SquareChangeEvent(int row, int column, Square cell) {
     this.row = row;
     this.column = column;
     this.cell = cell;
   }
 
-  public SquareType getCell() {
+  public Square getCell() {
     return cell;
   }
 

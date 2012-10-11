@@ -19,12 +19,12 @@ import javafx.stage.Stage;
 import org.foobar.minesweeper.event.BoardChangeEvent;
 import org.foobar.minesweeper.event.SquareChangeEvent;
 import org.foobar.minesweeper.model.Minefield;
-import org.foobar.minesweeper.model.SquareType;
-import static org.foobar.minesweeper.model.SquareType.BLANK;
-import static org.foobar.minesweeper.model.SquareType.FLAG;
-import static org.foobar.minesweeper.model.SquareType.HITMINE;
-import static org.foobar.minesweeper.model.SquareType.MINE;
-import static org.foobar.minesweeper.model.SquareType.WRONGMINE;
+import org.foobar.minesweeper.model.Square;
+import static org.foobar.minesweeper.model.Square.BLANK;
+import static org.foobar.minesweeper.model.Square.FLAG;
+import static org.foobar.minesweeper.model.Square.HITMINE;
+import static org.foobar.minesweeper.model.Square.MINE;
+import static org.foobar.minesweeper.model.Square.WRONGMINE;
 
 public class Minesweeper extends Application {
   private static final int CELL = 24;
@@ -99,7 +99,7 @@ public class Minesweeper extends Application {
     lastCol = -1;
   }
 
-  private int getTile(SquareType type) {
+  private int getTile(Square type) {
     switch (type) {
       case BLANK:
         return 0;
@@ -166,9 +166,9 @@ public class Minesweeper extends Application {
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
-        SquareType square = field.getSquareAt(r, c);
+        Square square = field.getSquareAt(r, c);
         
-        int tile = (square == SquareType.NUMBER)
+        int tile = (square == Square.NUMBER)
             ? field.countMines(r, c) + 5 : getTile(square); 
 
         drawTile(r, c, tile);
@@ -181,7 +181,7 @@ public class Minesweeper extends Application {
     int row = event.getRow();
     int col = event.getColumn();
 
-    int tile = event.getCell() == SquareType.NUMBER
+    int tile = event.getCell() == Square.NUMBER
         ? field.countMines(row, col) + 5 : getTile(event.getCell()); 
 
     drawTile(row, col, tile);
