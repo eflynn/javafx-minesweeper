@@ -152,7 +152,7 @@ public class MinesweeperPane extends AnchorPane {
     Square square = event.getSquare();
 
     if (square == Square.EXPOSED)
-      drawNumber(row, col, field.countMines(row, col));
+      drawNumber(row, col, field.getMineCount(row, col));
     else {
       GraphicsContext gc = canvas.getGraphicsContext2D();
       gc.drawImage(Tiles.getImage(square), col * SQUAREW, row * SQUAREH);
@@ -185,7 +185,7 @@ public class MinesweeperPane extends AnchorPane {
         Square square = field.getSquareAt(row, col);
 
         if (square == Square.EXPOSED)
-          drawNumber(row, col, field.countMines(row, col));
+          drawNumber(row, col, field.getMineCount(row, col));
         else
           canvas.getGraphicsContext2D().drawImage(Tiles.getImage(square), col * SQUAREW,
               row * SQUAREH);

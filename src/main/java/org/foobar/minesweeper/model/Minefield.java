@@ -13,10 +13,19 @@ import org.foobar.minesweeper.event.SquareChangeEvent;
 import com.google.common.eventbus.EventBus;
 
 /**
+ * Provides a model for a Minesweeper game. Objects that wish to be notified with updates from this
+ * class can register with the {@code EventBus}.
  * 
  * @author Evan Flynn
  */
 public final class Minefield {
+
+  /**
+   * The current state of the game.
+   * 
+   * The initial state is {@code START}. It changes to {@code PLAYING} when the first square has
+   * been revealed.
+   */
   public enum State {
     /** The game has been lost. */
     LOST,
@@ -81,7 +90,7 @@ public final class Minefield {
     return !gameOver && getSquareAt(row, column) == Square.BLANK;
   }
 
-  public int countMines(int row, int column) {
+  public int getMineCount(int row, int column) {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
 
@@ -125,20 +134,24 @@ public final class Minefield {
   }
 
   /**
+   * Gets the square at {@code row} and {@code column}
    * 
-   * @param row
-   * @param column
-   * @return
+   * @param rowIndex row to find {@code Square} with
+   * @param columnIndex column to find {@code Square} with
+   * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
+   *         {@code getRowCount()}
+   * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
+   *         {@code getColumnCount()}
    */
-  public Square getSquareAt(int row, int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
+  public Square getSquareAt(int rowIndex, int columnIndex) {
+    checkElementIndex(rowIndex, rows);
+    checkElementIndex(columnIndex, columns);
 
-    return table[row][column].square;
+    return table[rowIndex][columnIndex].square;
   }
 
   /**
-   * 
+   * Returns true if the game was won or lost.
    * 
    * @return
    */
@@ -146,6 +159,9 @@ public final class Minefield {
     return gameOver;
   }
 
+  /**
+   * Restarts the Minesweeper game.
+   */
   public void restart() {
     initialize();
     eventBus.post(BoardChangeEvent.INSTANCE);
@@ -195,11 +211,11 @@ public final class Minefield {
     checkElementIndex(column, columns);
 
     Entry entry = table[row][column];
-    
+
     if (gameOver || entry.square != Square.EXPOSED) {
       return;
     }
-     
+
     Iterable<Entry> neighbors = findNeighbors(row, column);
     int nearbyFlags = 0;
 
@@ -207,12 +223,12 @@ public final class Minefield {
       if (i.square == Square.FLAG)
         nearbyFlags++;
     }
-    
-    if (nearbyFlags == entry.nearbyMines) {      
+
+    if (nearbyFlags == entry.nearbyMines) {
       for (Entry i : neighbors) {
         if (i.square == Square.BLANK)
           reveal(i);
-      }      
+      }
     }
   }
 
