@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>Minesweeper</name>
-  <url>http://maven.apache.org</url>
+  <url>http://github.com/foobarman/javafx-minesweeper</url>
   <build>
     <plugins>
       <plugin>
