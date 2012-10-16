@@ -1,36 +1,20 @@
 package org.foobar.minesweeper.model;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
-import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Range;
-import com.google.common.collect.Table;
-import com.google.common.eventbus.EventBus;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import static java.util.EnumSet.of;
 import java.util.List;
-import java.util.Queue;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.foobar.minesweeper.event.BoardChangeEvent;
 import org.foobar.minesweeper.event.SquareChangeEvent;
-import static org.foobar.minesweeper.model.Square.FLAG;
+
+import com.google.common.eventbus.EventBus;
 
 /**
  * 
- * @author User
+ * @author Evan Flynn
  */
 public final class Minefield {
   public enum State {
@@ -46,10 +30,10 @@ public final class Minefield {
 
   static class Entry {
     final int column;
-    Square external = Square.BLANK;
-    Square internal = Square.BLANK;
-    int nearbyMines = -1;
     final int row;
+    boolean mine;
+    Square square = Square.BLANK;
+    int nearbyMines = 0;
 
     Entry(int row, int column) {
       this.row = row;
@@ -57,16 +41,11 @@ public final class Minefield {
     }
   }
 
-  // private static final EnumSet<State> playStates = of(State.START, State.PLAYING);
-  // private static final Logger logger =
-  // Logger.getLogger("org.foobar.minesweeper.model.minefield");
-
   private final int columns;
-  private int emptySquares;
+  private int unrevealed;
   private final EventBus eventBus;
-  private final Queue<Entry> frontier = new ArrayDeque<>(200);
   private State gameState;
-  private boolean isGameOver;
+  private boolean gameOver;
   private final int mines;
   private final int rows;
   private final Entry[][] table;
@@ -90,7 +69,6 @@ public final class Minefield {
     table = new Entry[rows][columns];
 
     initialize();
-    // log();
   }
 
   /**
@@ -100,14 +78,14 @@ public final class Minefield {
    * @return
    */
   public boolean canReveal(int row, int column) {
-    return !isGameOver && getSquareAt(row, column) == Square.BLANK;
+    return !gameOver && getSquareAt(row, column) == Square.BLANK;
   }
 
   public int countMines(int row, int column) {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
 
-    return countMines_(table[row][column]);
+    return table[row][column].nearbyMines;
   }
 
   /**
@@ -156,7 +134,7 @@ public final class Minefield {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
 
-    return table[row][column].external;
+    return table[row][column].square;
   }
 
   /**
@@ -165,7 +143,7 @@ public final class Minefield {
    * @return
    */
   public boolean isGameOver() {
-    return isGameOver;
+    return gameOver;
   }
 
   public void restart() {
@@ -196,9 +174,8 @@ public final class Minefield {
 
     Entry entry = table[row][column];
 
-    if (isGameOver || entry.external != Square.BLANK) {
+    if (gameOver || entry.square != Square.BLANK)
       return;
-    }
 
     reveal(table[row][column]);
   }
@@ -218,26 +195,24 @@ public final class Minefield {
     checkElementIndex(column, columns);
 
     Entry entry = table[row][column];
-
-    if (isGameOver || entry.external == Square.NUMBER) {
+    
+    if (gameOver || entry.square != Square.EXPOSED) {
       return;
     }
-
+     
     Iterable<Entry> neighbors = findNeighbors(row, column);
     int nearbyFlags = 0;
 
     for (Entry i : neighbors) {
-      if (i.external == Square.FLAG) {
+      if (i.square == Square.FLAG)
         nearbyFlags++;
-      }
     }
-
-    if (nearbyFlags == countMines_(entry)) {
+    
+    if (nearbyFlags == entry.nearbyMines) {      
       for (Entry i : neighbors) {
-        if (i.external == Square.BLANK) {
-          reveal(entry);
-        }
-      }
+        if (i.square == Square.BLANK)
+          reveal(i);
+      }      
     }
   }
 
@@ -260,17 +235,15 @@ public final class Minefield {
     Entry entry = table[row][column];
     boolean post = true;
 
-    if (entry.external == Square.FLAG) {
-      entry.external = Square.BLANK;
-    } else if (entry.external == Square.BLANK) {
-      entry.external = Square.FLAG;
-    } else {
+    if (entry.square == Square.FLAG)
+      entry.square = Square.BLANK;
+    else if (entry.square == Square.BLANK)
+      entry.square = Square.FLAG;
+    else
       post = false;
-    }
 
-    if (post) {
-      eventBus.post(new SquareChangeEvent(row, column, entry.external));
-    }
+    if (post)
+      eventBus.post(new SquareChangeEvent(row, column, entry.square));
   }
 
   private void addWithConstraint(Collection<Entry> collection, boolean predicate, int row,
@@ -278,22 +251,6 @@ public final class Minefield {
     if (predicate) {
       collection.add(table[row][column]);
     }
-  }
-
-  private int countMines_(Entry entry) {
-    if (entry.nearbyMines == -1) {
-      int mines = 0;
-
-      for (Entry e : findNeighbors(entry.row, entry.column)) {
-        if (e.internal == Square.MINE) {
-          mines++;
-        }
-      }
-
-      entry.nearbyMines = mines;
-    }
-
-    return entry.nearbyMines;
   }
 
   private List<Entry> findNeighbors(int row, int column) {
@@ -322,14 +279,13 @@ public final class Minefield {
   }
 
   private void initialize() {
-    emptySquares = rows * columns;
+    unrevealed = (rows * columns) - mines;
     gameState = State.START;
-    isGameOver = false;
+    gameOver = false;
 
     for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < columns; c++) {
+      for (int c = 0; c < columns; c++)
         table[r][c] = new Entry(r, c);
-      }
     }
   }
 
@@ -338,113 +294,90 @@ public final class Minefield {
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
-        if ((r < row - 1 || r > row + 1) && (c < column - 1 || c > column + 1)) {
+        if ((r < row - 1 || r > row + 1) && (c < column - 1 || c > column + 1))
           list.add(table[r][c]);
-        }
       }
     }
 
     Collections.shuffle(list);
+    List<Entry> mineSet = list.subList(0, mines);
 
-    for (Entry i : list.subList(0, 10)) {
-      i.internal = Square.MINE;
+    for (Entry i : mineSet) {
+      i.mine = true;
+
+      for (Entry j : findNeighbors(i.row, i.column))
+        j.nearbyMines++;
     }
-    //
-    // for (Entry i : list) {
-    // if (!i.cell.hasNearbyMines() || !i.cell.isMine()) {
-    // emptySquares--;
-    // }
-    // }
   }
 
-  private void reveal(Entry e) {
+  private void reveal(Entry entry) {
     if (gameState == State.START) {
       gameState = State.PLAYING;
 
-      plantMines(e.row, e.column);
+      plantMines(entry.row, entry.column);
     }
 
-    if (e.internal == Square.MINE) {
-      e.external = Square.HITMINE;
-      e.internal = Square.HITMINE;
+    if (entry.mine) {
+      entry.square = Square.HITMINE;
 
       for (Entry[] columns : table) {
         for (Entry i : columns) {
-          if (i.internal == Square.MINE) {
-            e.external = Square.MINE;
-          } else if (i.external == FLAG) {
-            e.external = Square.WRONGMINE;
-          }
+          if (i.mine)
+            i.square = Square.MINE;
+          else if (i.square == Square.FLAG)
+            i.square = Square.WRONGMINE;
         }
       }
 
-      isGameOver = true;
+      gameOver = true;
       gameState = State.LOST;
 
       eventBus.post(BoardChangeEvent.INSTANCE);
       eventBus.post(gameState);
-    } else {
-      assert frontier.isEmpty();
+    }
+    else if (entry.nearbyMines != 0) {
+      setExposed(entry);
 
-      frontier.add(e);
+      if (checkGameWon())
+        eventBus.post(gameState);
 
-      Entry pos;
-
-      while ((pos = frontier.poll()) != null) {
-        pos.external = Square.NUMBER;
-
-        if (countMines_(pos) == 0) {
-          for (Entry value : findNeighbors(pos.row, pos.column)) {
-            if (value.external != Square.NUMBER) {
-              frontier.add(value);
-            }
-          }
-        }
-      }
+      eventBus.post(new SquareChangeEvent(entry.row, entry.column, entry.square));
+    }
+    else {
+      visit(entry);
 
       eventBus.post(BoardChangeEvent.INSTANCE);
+
+      if (checkGameWon())
+        eventBus.post(gameState);
     }
   }
 
-  // private void log() {
-  // logger.addHandler(new ConsoleHandler());
-  // logger.setLevel(Level.ALL);
-  //
-  // StringBuilder builder = new StringBuilder();
-  //
-  // builder.append("DEBUG\n");
-  //
-  // for (Square[] row : table) {
-  // for (Square cell : row) {
-  // builder.append(cell.isMine() ? '*' : '.');
-  // }
-  // builder.append("\n");
-  // }
-  //
-  // logger.info(builder.toString());
-  //
-  // builder = new StringBuilder();
-  //
-  // for (Square[] row : table) {
-  // for (Square cell : row) {
-  // builder.append(cell.debugNumbers());
-  // builder.append(' ');
-  // }
-  // builder.append("\n");
-  // }
-  //
-  // logger.info(builder.toString());
-  //
-  // builder = new StringBuilder();
-  //
-  // builder.append("DEBUG\n");
-  //
-  // for (Square[] row : table) {
-  // for (Square cell : row) {
-  // builder.append(cell.getType().getMineCountOr(2));
-  // }
-  // builder.append("\n");
-  // }
-  // System.out.println(builder.toString());
-  // }
+  private void setExposed(Entry entry) {
+    unrevealed--;
+    entry.square = Square.EXPOSED;
+  }
+
+  private boolean checkGameWon() {
+    boolean result = (unrevealed == 0);
+
+    if (result) {
+      gameOver = true;
+      gameState = State.WON;
+    }
+
+    return result;
+  }
+
+  private void visit(Entry entry) {
+    setExposed(entry);
+
+    if (entry.nearbyMines == 0) {
+      for (Entry adj : findNeighbors(entry.row, entry.column)) {
+        if (adj.square != Square.EXPOSED) {
+          visit(adj);
+        }
+      }
+    }
+  }
 }

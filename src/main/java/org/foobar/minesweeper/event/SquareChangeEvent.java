@@ -7,13 +7,13 @@ public class SquareChangeEvent {
   private final int row;
   private final int column;
 
-  public SquareChangeEvent(int row, int column, Square cell) {
+  public SquareChangeEvent(int row, int column, Square square) {
     this.row = row;
     this.column = column;
-    this.cell = cell;
+    this.cell = square;
   }
 
-  public Square getCell() {
+  public Square getSquare() {
     return cell;
   }
 
