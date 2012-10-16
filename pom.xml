@@ -61,4 +61,7 @@
       <type>jar</type>
     </dependency>
   </dependencies>
+  <scm>
+  	<url>https://github.com/foobarman/javafx-minesweeper</url>
+  </scm>
 </project>
