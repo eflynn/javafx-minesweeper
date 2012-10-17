@@ -292,7 +292,7 @@ public final class Minefield {
     assert row >= 0 && row < rows : "invalid row: " + row;
     assert column >= 0 && column < columns : "invalid column: " + column;
 
-    List<Entry> neighbors = new ArrayList<>(8);
+    List<Entry> neighbors = new ArrayList<Entry>(8);
 
     boolean top = row > 0;
     boolean bottom = row + 1 < rows;
@@ -325,7 +325,7 @@ public final class Minefield {
   }
 
   private void plantMines(int row, int column) {
-    List<Entry> list = new ArrayList<>(rows * columns);
+    List<Entry> list = new ArrayList<Entry>(rows * columns);
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
