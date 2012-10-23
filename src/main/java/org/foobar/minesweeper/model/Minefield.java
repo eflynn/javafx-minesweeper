@@ -1,15 +1,15 @@
 /*
  * Copyright (c) 2012 Evan Flynn
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
  * including without limitation the rights to use, copy, modify, merge, publish, distribute,
  * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
@@ -34,14 +34,14 @@ import com.google.common.eventbus.EventBus;
 /**
  * Provides a model for a Minesweeper game. Objects that wish to be notified with updates from this
  * class can register with the {@code EventBus}.
- * 
+ *
  * @author Evan Flynn
  */
 public final class Minefield {
 
   /**
    * The current state of the game.
-   * 
+   *
    * The initial state is {@code START}. It changes to {@code PLAYING} when the first square has
    * been revealed.
    */
@@ -83,7 +83,7 @@ public final class Minefield {
   }
 
   /**
-   * 
+   *
    * @param rows
    * @param columns
    * @param mines
@@ -100,7 +100,7 @@ public final class Minefield {
   }
 
   /**
-   * 
+   *
    * @param row
    * @param column
    * @return
@@ -118,7 +118,7 @@ public final class Minefield {
 
   /**
    * Gets the number of columns in the minefield.
-   * 
+   *
    * @return the number of columns in the minefield.
    */
   public int getColumnCount() {
@@ -127,7 +127,7 @@ public final class Minefield {
 
   /**
    * Gets the current game state.
-   * 
+   *
    * @return the current game state.
    */
   public State getGameState() {
@@ -136,7 +136,7 @@ public final class Minefield {
 
   /**
    * Gets number of mines
-   * 
+   *
    * @return the mines
    */
   public int getMines() {
@@ -145,7 +145,7 @@ public final class Minefield {
 
   /**
    * Gets number of rows
-   * 
+   *
    * @return number of rows
    */
   public int getRowCount() {
@@ -154,7 +154,7 @@ public final class Minefield {
 
   /**
    * Gets the square at {@code row} and {@code column}
-   * 
+   *
    * @param rowIndex row to find {@code Square} with
    * @param columnIndex column to find {@code Square} with
    * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
@@ -171,7 +171,7 @@ public final class Minefield {
 
   /**
    * Returns true if the game was won or lost.
-   * 
+   *
    * @return
    */
   public boolean isGameOver() {
@@ -189,15 +189,15 @@ public final class Minefield {
   /**
    * Reveals a cell at row and column. If the cell is a mine, the game is over. If the game is over
    * or the cell is flagged, the method returns.
-   * 
+   *
    * <p>
    * Calling this method repeatedly with the same row and column will no have no effect until
    * restart() is called.
    * </p>
-   * 
+   *
    * @param row the row whose cell will be revealed.
    * @param column the column whose cell will be revealed.
-   * 
+   *
    * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
    *         {@code getRowCount()}
    * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
@@ -216,10 +216,10 @@ public final class Minefield {
   }
 
   /**
-   * 
+   *
    * @param row the row whose flag will be toggled.
    * @param column the column whose flag will be toggled.
-   * 
+   *
    * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
    *         {@code getRowCount()}
    * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
@@ -254,10 +254,10 @@ public final class Minefield {
   /**
    * Toggles the flag state of the cell at row and column. If the game is over or the cell cannot be
    * flagged (or unflagged), the method returns.
-   * 
+   *
    * @param row the row whose flag will be toggled.
    * @param column the column whose flag will be toggled.
-   * 
+   *
    * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
    *         {@code getRowCount()}
    * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
