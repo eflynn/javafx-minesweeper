@@ -17,7 +17,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-@ParametersAreNonnullByDefault
 package org.foobar.minesweeper.model;
-
-import javax.annotation.ParametersAreNonnullByDefault;
