@@ -294,21 +294,12 @@ public final class Minefield {
 
     List<Entry> neighbors = new ArrayList<Entry>(8);
 
-    boolean top = row > 0;
-    boolean bottom = row + 1 < rows;
-    boolean left = column > 0;
-    boolean right = column + 1 < columns;
-
-    addWithConstraint(neighbors, top, row - 1, column);
-    addWithConstraint(neighbors, bottom, row + 1, column);
-    addWithConstraint(neighbors, left, row, column - 1);
-    addWithConstraint(neighbors, right, row, column + 1);
-
-    // diagonals
-    addWithConstraint(neighbors, top && left, row - 1, column - 1);
-    addWithConstraint(neighbors, top && right, row - 1, column + 1);
-    addWithConstraint(neighbors, bottom && left, row + 1, column - 1);
-    addWithConstraint(neighbors, bottom && right, row + 1, column + 1);
+    for(int r = row - 1; r < row + 1; r++) {
+      for(int c = column - 1; c < column + 1; c++) {
+        if (r != row && c != column && r >= 0 && c >= 0 && r < rows && c < columns)
+          neighbors.add(table[r][c]);
+      }
+    }
 
     return neighbors;
   }
