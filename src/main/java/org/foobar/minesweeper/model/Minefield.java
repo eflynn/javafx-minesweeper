@@ -294,9 +294,9 @@ public final class Minefield {
 
     List<Entry> neighbors = new ArrayList<Entry>(8);
 
-    for(int r = row - 1; r < row + 1; r++) {
-      for(int c = column - 1; c < column + 1; c++) {
-        if (r != row && c != column && r >= 0 && c >= 0 && r < rows && c < columns)
+    for(int r = row - 1; r <= row + 1; r++) {
+      for(int c = column - 1; c <= column + 1; c++) {
+        if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows && c < columns)
           neighbors.add(table[r][c]);
       }
     }
