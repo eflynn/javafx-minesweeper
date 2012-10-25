@@ -18,6 +18,7 @@ package org.foobar.minesweeper.model;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,6 +64,13 @@ public final class Minefield {
     Entry(int row, int column) {
       this.row = row;
       this.column = column;
+    }
+
+    void onGameLost() {
+      if (mine)
+        square = Square.MINE;
+      else if (square == Square.FLAG)
+        square = Square.WRONGMINE;
     }
   }
 
@@ -232,7 +240,7 @@ public final class Minefield {
       return;
     }
 
-    Iterable<Entry> neighbors = findNeighbors(row, column);
+    Entry[] neighbors = findNeighbors(row, column);
     int nearbyFlags = 0;
 
     for (Entry i : neighbors) {
@@ -265,40 +273,32 @@ public final class Minefield {
     checkElementIndex(column, columns);
 
     Entry entry = table[row][column];
-    boolean post = true;
 
     if (entry.square == Square.FLAG)
       entry.square = Square.BLANK;
     else if (entry.square == Square.BLANK)
       entry.square = Square.FLAG;
     else
-      post = false;
+      return;
 
-    if (post)
-      eventBus.post(new SquareChangeEvent(row, column, entry.square));
+    eventBus.post(new SquareChangeEvent(row, column, entry.square));
   }
 
-  private void addWithConstraint(Collection<Entry> collection, boolean predicate, int row,
-      int column) {
-    if (predicate) {
-      collection.add(table[row][column]);
-    }
-  }
-
-  private List<Entry> findNeighbors(int row, int column) {
+  private Entry[] findNeighbors(int row, int column) {
     assert row >= 0 && row < rows : "invalid row: " + row;
     assert column >= 0 && column < columns : "invalid column: " + column;
 
-    List<Entry> neighbors = new ArrayList<Entry>(8);
+    Entry[] neighbors = new Entry[8];
+    int size = 0;
 
     for(int r = row - 1; r <= row + 1; r++) {
       for(int c = column - 1; c <= column + 1; c++) {
         if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows && c < columns)
-          neighbors.add(table[r][c]);
+          neighbors[size++] = table[r][c];
       }
     }
 
-    return neighbors;
+    return Arrays.copyOf(neighbors, size);
   }
 
   private void initialize() {
@@ -344,12 +344,8 @@ public final class Minefield {
       entry.square = Square.HITMINE;
 
       for (Entry[] columns : table) {
-        for (Entry i : columns) {
-          if (i.mine)
-            i.square = Square.MINE;
-          else if (i.square == Square.FLAG)
-            i.square = Square.WRONGMINE;
-        }
+        for (Entry i : columns)
+          i.onGameLost();
       }
 
       gameOver = true;
