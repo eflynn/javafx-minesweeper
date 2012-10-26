@@ -60,10 +60,10 @@
     <fx:fileset file="lib/guava-13.0.1.jar"/>
   </fx:resources>
 
-  <target name="dist" depends="fxjar">
+  <target name="dist" depends="compile">
     <copy file="lib/guava-13.0.1.jar" todir="${dist.dir}"/>
 
-    <fx:jar destfile="${dist.dir}/minesweeper.jar">
+    <fx:jar destfile="${dist.dir}/Minesweeper.jar">
       <fx:application refid="minesweeper"/>
       <fx:resources refid="appRes"/>
 
@@ -86,7 +86,7 @@
     <fx:signjar keystore="${build.dir}/test.keystore"
                 alias="signFiles" storepass="xyz123">
       <fileset dir="${dist.dir}">
-        <include name="minesweeper.jar"/>
+        <include name="Minesweeper.jar"/>
         <include name="guava-13.0.1.jar"/>
       </fileset>
     </fx:signjar>
@@ -99,7 +99,7 @@
       <fx:resources>
         <fx:fileset dir="${dist.dir}">
           <include name="guava-13.0.1.jar"/>
-          <include name="minesweeper.jar"/>
+          <include name="Minesweeper.jar"/>
         </fx:fileset>
       </fx:resources>
 
