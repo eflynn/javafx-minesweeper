@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Minesweeper" default="default" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
+<project name="Minesweeper" default="dist" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
   <property environment="env" />
   <property name="build.dir" location="build"/>
   <property name="build.classes.dir" location="${build.dir}/classes"/>
@@ -12,15 +12,16 @@
   <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
            uri="javafx:com.sun.javafx.tools.ant"
            classpath="${javafx.lib.ant-javafx.jar}"/>
+
   <taskdef resource="proguard/ant/task.properties"
            classpath="lib/proguard.jar"/>
+
   <path id="compile.classpath">
     <pathelement path="${java.home}/lib/jfxrt.jar"/>
     <pathelement path="lib/guava-13.0.1.jar"/>
-
   </path>
 
-  <target name="init">
+  <target name="init" description="Initialize the build">
     <mkdir dir="${build.dir}" />
     <mkdir dir="${build.classes.dir}" />
     <mkdir dir="dist" />
@@ -59,7 +60,7 @@
     <fx:fileset file="lib/guava-13.0.1.jar"/>
   </fx:resources>
 
-  <target name="fxjar" depends="compile">
+  <target name="dist" depends="fxjar">
     <copy file="lib/guava-13.0.1.jar" todir="${dist.dir}"/>
 
     <fx:jar destfile="${dist.dir}/minesweeper.jar">
@@ -80,7 +81,7 @@
     <genkey alias="signFiles"
             storepass="xyz123" keystore="${build.dir}/test.keystore"
             dname="CN=emailAddress=evan.flynn@gmail.com, OU=Evan Flynn, O=Foobarman Enterprises, C=US"/>
-    
+
     <!-- use blob signing for smaller jar size -->
     <fx:signjar keystore="${build.dir}/test.keystore"
                 alias="signFiles" storepass="xyz123">
@@ -89,14 +90,12 @@
         <include name="guava-13.0.1.jar"/>
       </fileset>
     </fx:signjar>
-  </target>
-  
-  <target name="fxdeploy" depends="fxjar">
+
     <fx:deploy width="260" height="300" outdir="${dist.dir}" outfile="${application.title}">
       <fx:info title="${application.title}" />
       <fx:application refId="minesweeper"/>
       <fx:permissions elevated="true"/>
-      
+
       <fx:resources>
         <fx:fileset dir="${dist.dir}">
           <include name="guava-13.0.1.jar"/>
