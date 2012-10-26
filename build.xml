@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Minesweeper" default="default" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
+  <property environment="env" />
+  <property name="build.dir" location="build"/>
+  <property name="build.classes.dir" location="${build.dir}/classes"/>
+  <property name="dist.dir" location="dist"/>
+  <property name="source.dir" location="src/main/java"/>
+  <property name="javafx.lib.ant-javafx.jar" location="${env.JAVA_HOME}/lib/ant-javafx.jar"/>
+  <property name="manifest.mf" location="${build.dir}/manifest.mf" />
+  <property file="build.properties"/>
+
+  <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
+           uri="javafx:com.sun.javafx.tools.ant"
+           classpath="${javafx.lib.ant-javafx.jar}"/>
+  <taskdef resource="proguard/ant/task.properties"
+           classpath="lib/proguard.jar"/>
+  <path id="compile.classpath">
+    <pathelement path="${java.home}/lib/jfxrt.jar"/>
+    <pathelement path="lib/guava-13.0.1.jar"/>
+
+  </path>
+
+  <target name="init">
+    <mkdir dir="${build.dir}" />
+    <mkdir dir="${build.classes.dir}" />
+    <mkdir dir="dist" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac destdir="${build.classes.dir}"
+           srcdir="${source.dir}"
+           includeAntRuntime="no"
+           classpathref="compile.classpath"
+           source="1.7"
+           target="1.7"/>
+
+    <copy todir="${build.classes.dir}">
+      <fileset dir="src/main/resources" includes="${source.files.tocopy}" />
+    </copy>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build.dir}" />
+    <delete dir="${dist.dir}" />
+  </target>
+
+  <target name="execute" depends="compile">
+    <java classname="org.foobar.minesweeper.Minesweeper"
+          classpath="${build.classes.dir}">
+    </java>
+  </target>
+
+  <fx:application id="minesweeper"
+                  name="${application.title}"
+                  description="JavaFX Minesweeper"
+                  mainClass="org.foobar.minesweeper.Minesweeper"/>
+
+  <fx:resources id="appRes">
+    <fx:fileset file="lib/guava-13.0.1.jar"/>
+  </fx:resources>
+
+  <target name="fxjar" depends="compile">
+    <copy file="lib/guava-13.0.1.jar" todir="${dist.dir}"/>
+
+    <fx:jar destfile="${dist.dir}/minesweeper.jar">
+      <fx:application refid="minesweeper"/>
+      <fx:resources refid="appRes"/>
+
+      <manifest>
+        <attribute name="Implementation-Vendor" value="${application.vendor}"/>
+        <attribute name="Implementation-Title" value="${application.title}"/>
+        <attribute name="Implementation-Version" value="1.0"/>
+      </manifest>
+
+      <fileset dir="${build.classes.dir}"/>
+    </fx:jar>
+
+    <!-- sign application jar. Use new self signed certificate -->
+    <delete file="${build.dir}/test.keystore"/>
+    <genkey alias="signFiles"
+            storepass="xyz123" keystore="${build.dir}/test.keystore"
+            dname="CN=emailAddress=evan.flynn@gmail.com, OU=Evan Flynn, O=Foobarman Enterprises, C=US"/>
+    
+    <!-- use blob signing for smaller jar size -->
+    <fx:signjar keystore="${build.dir}/test.keystore"
+                alias="signFiles" storepass="xyz123">
+      <fileset dir="${dist.dir}">
+        <include name="minesweeper.jar"/>
+        <include name="guava-13.0.1.jar"/>
+      </fileset>
+    </fx:signjar>
+  </target>
+  
+  <target name="fxdeploy" depends="fxjar">
+    <fx:deploy width="260" height="300" outdir="${dist.dir}" outfile="${application.title}">
+      <fx:info title="${application.title}" />
+      <fx:application refId="minesweeper"/>
+      <fx:permissions elevated="true"/>
+      
+      <fx:resources>
+        <fx:fileset dir="${dist.dir}">
+          <include name="guava-13.0.1.jar"/>
+          <include name="minesweeper.jar"/>
+        </fx:fileset>
+      </fx:resources>
+
+    </fx:deploy>
+  </target>
+</project>
