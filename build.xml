@@ -13,9 +13,6 @@
            uri="javafx:com.sun.javafx.tools.ant"
            classpath="${javafx.lib.ant-javafx.jar}"/>
 
-  <taskdef resource="proguard/ant/task.properties"
-           classpath="lib/proguard.jar"/>
-
   <path id="compile.classpath">
     <pathelement path="${java.home}/lib/jfxrt.jar"/>
     <pathelement path="lib/guava-13.0.1.jar"/>
