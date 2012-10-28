@@ -56,8 +56,8 @@
   <fx:resources id="appRes">
     <fx:fileset file="lib/guava-13.0.1.jar"/>
   </fx:resources>
-
-  <target name="dist" depends="compile">
+<!--  <target name="dist" depends="compile"> -->
+    <target name="dist">
     <copy file="lib/guava-13.0.1.jar" todir="${dist.dir}"/>
 
     <fx:jar destfile="${dist.dir}/Minesweeper.jar">
