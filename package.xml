@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Minesweeper" default="dist" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
+  <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
+           uri="javafx:com.sun.javafx.tools.ant"
+           classpath=".:${maven.dependency.com.oracle.ant-javafx.jar.path}"/>
+
+  <fx:application id="minesweeper"
+                  name="Minesweeper"
+                  mainClass="org.foobar.minesweeper.Minesweeper"/>
+
+  <fx:resources id="appRes">
+    <fx:fileset file="maven.dependency.com.google.guava.guava.jar.path"/>
+  </fx:resources>
+  
+  <target name="dist">
+  
+    <!-- Produces the Jar file with proper manifest -->
+    <fx:jar destfile="${project.build.directory}/Minesweeper.jar">
+      <fx:application refid="minesweeper"/>
+      <fx:resources refid="appRes"/>
+
+      <manifest>
+        <attribute name="Implementation-Vendor" value="${application.vendor}"/>
+        <attribute name="Implementation-Title" value="${application.title}"/>
+        <attribute name="Implementation-Version" value="1.0"/>
+      </manifest>
+
+      <fileset dir="${project.build.outputDirectory}"/>
+    </fx:jar>
+
+    <!-- sign application jar. Use new self signed certificate -->
+    <delete file="${project.build.directory}/test.keystore"/>
+    <genkey alias="signFiles"
+            storepass="xyz123" keystore="${project.build.directory}/test.keystore"
+            dname="CN=evan.flynn@gmail.com, C=US"/>
+
+    <!-- use blob signing for smaller jar size -->
+    <fx:signjar keystore="${project.build.directory}/test.keystore"
+                alias="signFiles" storepass="xyz123">
+      <fileset dir="${dist.dir}">
+        <include name="Minesweeper.jar"/>
+        <include name="guava-13.0.1.jar"/>
+      </fileset>
+    </fx:signjar>
+
+    <fx:deploy width="260" height="300" outdir="${dist.dir}" outfile="${application.title}">
+      <fx:info title="${application.title}" />
+      <fx:application refId="minesweeper"/>
+      <fx:permissions elevated="true"/>
+
+      <fx:resources>
+        <fx:fileset dir="${dist.dir}">
+          <include name="guava-13.0.1.jar"/>
+          <include name="Minesweeper.jar"/>
+        </fx:fileset>
+      </fx:resources>
+
+    </fx:deploy>
+  </target>
+</project>
