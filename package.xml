@@ -5,56 +5,63 @@
            classpath=".:${maven.dependency.com.oracle.ant-javafx.jar.path}"/>
 
   <fx:application id="minesweeper"
-                  name="Minesweeper"
-                  mainClass="org.foobar.minesweeper.Minesweeper"/>
+                  name="${project.name}"
+                  mainClass="${project.javaFX.mainClass}"/>
 
   <fx:resources id="appRes">
-    <fx:fileset file="maven.dependency.com.google.guava.guava.jar.path"/>
+    <fx:fileset dir="${project.build.directory}">
+      <include name="${project.name}.jar"/>
+      <include name="lib/guava-13.0.1.jar"/>
+    </fx:fileset>
   </fx:resources>
-  
-  <target name="dist">
-  
-    <!-- Produces the Jar file with proper manifest -->
-    <fx:jar destfile="${project.build.directory}/Minesweeper.jar">
+
+  <!-- Produces the Jar file with proper manifest -->
+  <target name="jar">
+    <mkdir dir="${project.build.directory}/lib"/>
+    <copy file="${maven.dependency.com.google.guava.guava.jar.path}"
+      todir="${project.build.directory}/lib"/>
+
+    <fx:jar destfile="${project.build.directory}/${project.name}.jar">
       <fx:application refid="minesweeper"/>
-      <fx:resources refid="appRes"/>
+      <fx:resources refId="appRes"/>
 
       <manifest>
-        <attribute name="Implementation-Vendor" value="${application.vendor}"/>
-        <attribute name="Implementation-Title" value="${application.title}"/>
+        <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+        <attribute name="Implementation-Title" value="${project.name}"/>
         <attribute name="Implementation-Version" value="1.0"/>
       </manifest>
 
       <fileset dir="${project.build.outputDirectory}"/>
     </fx:jar>
+  </target>
 
-    <!-- sign application jar. Use new self signed certificate -->
+  <!-- Sign application jar. Use new self signed certificate -->
+  <!-- Use blob signing for smaller jar size -->
+  <target name="signjar" depends="jar">
     <delete file="${project.build.directory}/test.keystore"/>
     <genkey alias="signFiles"
             storepass="xyz123" keystore="${project.build.directory}/test.keystore"
             dname="CN=evan.flynn@gmail.com, C=US"/>
 
-    <!-- use blob signing for smaller jar size -->
     <fx:signjar keystore="${project.build.directory}/test.keystore"
                 alias="signFiles" storepass="xyz123">
-      <fileset dir="${dist.dir}">
-        <include name="Minesweeper.jar"/>
-        <include name="guava-13.0.1.jar"/>
+      <fileset dir="${project.build.directory}">
+        <include name="${project.name}.jar"/>
+        <include name="lib/guava-13.0.1.jar"/>
       </fileset>
     </fx:signjar>
+  </target>
 
-    <fx:deploy width="260" height="300" outdir="${dist.dir}" outfile="${application.title}">
-      <fx:info title="${application.title}" />
+  <target name="deploy" depends="jar,signjar">
+    <fx:deploy width="260"
+               height="300"
+               outdir="${project.build.directory}"
+               outfile="${project.name}"
+               embedJNLP="true">
+      <fx:info title="${project.name}" />
       <fx:application refId="minesweeper"/>
       <fx:permissions elevated="true"/>
-
-      <fx:resources>
-        <fx:fileset dir="${dist.dir}">
-          <include name="guava-13.0.1.jar"/>
-          <include name="Minesweeper.jar"/>
-        </fx:fileset>
-      </fx:resources>
-
+      <fx:resources refId="appRes"/>
     </fx:deploy>
   </target>
 </project>

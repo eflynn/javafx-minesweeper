@@ -1,14 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>org.foobar.minesweeper</groupId>
   <artifactId>minesweeper</artifactId>
   <version>0.3</version>
   <name>Minesweeper</name>
   <description>
-    A Minesweeper clone written in Java using JavaFX.
+    A Minesweeper game written in Java using JavaFX.
   </description>
   <licenses>
     <license>
@@ -63,17 +61,22 @@
         </executions>
       </plugin>
       <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.2-beta-5</version>
+        <configuration>
+          <descriptor>src/main/assembly/bin.xml</descriptor>
+        </configuration>
+      </plugin>
+      <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.7</version>
         <executions>
           <execution>
+            <id>make-deployment-files</id>
             <phase>package</phase>
             <configuration>
               <target>
-                <property name="application.title" value="Minesweeper"/>
-                <property name="application.vendor" value="Evan Flynn"/>
-
-                <ant antfile="package.xml" target="dist" />
+                <ant antfile="package.xml" target="deploy" />
               </target>
             </configuration>
             <goals>
@@ -82,21 +85,11 @@
           </execution>
         </executions>
       </plugin>
-      <!--
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
-          <debug>false</debug>
-        </configuration>
-      </plugin>
-      -->
     </plugins>
   </build>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.vendor>Evan Flynn</project.vendor>
+    <project.javaFX.mainClass>org.foobar.minesweeper.Minesweeper</project.javaFX.mainClass>
   </properties>
 </project>
