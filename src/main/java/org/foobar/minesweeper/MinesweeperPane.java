@@ -207,5 +207,4 @@ public class MinesweeperPane extends AnchorPane {
       }
     }
   }
-
 }
