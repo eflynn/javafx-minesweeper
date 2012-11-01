@@ -41,7 +41,7 @@ import com.google.common.eventbus.Subscribe;
 public class MinesweeperPane extends AnchorPane {
   public static final int SQUAREW = 24;
   public static final int SQUAREH = 24;
-  private final Minefield field;  
+  private final Minefield field;
   private final Canvas canvas = new Canvas(240, 240);
   private final EventBus eventBus;
 
@@ -50,54 +50,53 @@ public class MinesweeperPane extends AnchorPane {
   public MinesweeperPane(MinesweeperPane pane) {
     this(pane.field, pane.eventBus);
   }
-  
+
   public MinesweeperPane(Minefield field, final EventBus eventBus) {
     this.field = field;
     this.eventBus = eventBus;
-    
+
     installCanvasHandlers();
-    
+
     Button newGameButton = new Button("New Game");
     Button clone = new Button("Clone");
-    
+
     newGameButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent event) {
         MinesweeperPane.this.field.restart();
       }
     });
-    
-    
+
     clone.setOnMouseClicked(new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent event) {
         Parent root = new MinesweeperPane(MinesweeperPane.this);
         eventBus.register(root);
-        
+
         Stage stage = new Stage();
-        
+
         stage.setResizable(false);
         stage.setScene(new Scene(root, 260, 300));
         stage.setTitle("Minesweeper");
-        stage.show();        
+        stage.show();
       }
     });
-    
+
     HBox hbox = new HBox(12);
-    
+
     hbox.getChildren().addAll(newGameButton, clone);
     this.getChildren().addAll(hbox, canvas);
-    
+
     AnchorPane.setTopAnchor(hbox, 12.0);
     AnchorPane.setLeftAnchor(hbox, 10.0);
     AnchorPane.setBottomAnchor(canvas, 10.0);
     AnchorPane.setLeftAnchor(canvas, 10.0);
-    
+
     updateBoard(BoardChangeEvent.INSTANCE);
   }
-  
+
   private void installCanvasHandlers() {
-    
+
     canvas.setOnMousePressed(new MouseHandler() {
       @Override
       public void handle(MouseEvent event, int row, int column) {
@@ -141,7 +140,6 @@ public class MinesweeperPane extends AnchorPane {
       }
     });
   }
-  
 
   private static abstract class MouseHandler implements EventHandler<MouseEvent> {
     @Override
@@ -174,10 +172,9 @@ public class MinesweeperPane extends AnchorPane {
       gc.drawImage(Tiles.getImage(square), col * SQUAREW, row * SQUAREH);
     }
   }
-  
+
   @Subscribe
   public void fieldStateChanged(Minefield.State state) {
-      
   }
 
   private void drawNumber(int row, int column, int number) {
