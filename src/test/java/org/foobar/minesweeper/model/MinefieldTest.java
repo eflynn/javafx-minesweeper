@@ -68,7 +68,7 @@ public final class MinefieldTest {
   public void testFlag() {
     field.toggleFlag(0, 0);
 
-    assertEquals(Square.FLAG, field.getSquareAt(0, 0));
+    assertEquals(Square.FLAG, field.getSquareAt(0, 0).type());
     verify(eventBus).post(anyObject());
   }
 
