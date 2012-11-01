@@ -21,13 +21,18 @@ import org.foobar.minesweeper.model.Square;
 import javafx.scene.image.Image;
 
 public class Tiles {
-  public static final Image BLANK = new Image("blank.png");
-  public static final Image FLAG = new Image("flag.png");
-  public static final Image EXPOSED = new Image("exposed.png");
-  public static final Image NUMBERS = new Image("numbers.png");
-  public static final Image MINE = new Image("mine.png");
-  public static final Image HITMINE = new Image("hitmine.png");
-  public static final Image WRONGMINE = new Image("wrongmine.png");
+  private static final String baseDir = "resources/";
+  public static final Image BLANK = loadImage("blank.png");
+  public static final Image FLAG = loadImage("flag.png");
+  public static final Image EXPOSED = loadImage("exposed.png");
+  public static final Image NUMBERS = loadImage("numbers.png");
+  public static final Image MINE = loadImage("mine.png");
+  public static final Image HITMINE = loadImage("hitmine.png");
+  public static final Image WRONGMINE = loadImage("wrongmine.png");
+
+  private static Image loadImage(String path) {
+    return new Image(baseDir + path);
+  }
   
   public static Image getImage(Square square) {
     switch (square) {
