@@ -19,11 +19,13 @@ package org.foobar.minesweeper;
 import static javafx.scene.input.MouseButton.MIDDLE;
 import static javafx.scene.input.MouseButton.PRIMARY;
 import javafx.event.EventHandler;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -34,6 +36,7 @@ import org.foobar.minesweeper.event.BoardChangeEvent;
 import org.foobar.minesweeper.event.SquareChangeEvent;
 import org.foobar.minesweeper.model.Minefield;
 import org.foobar.minesweeper.model.Square;
+import org.foobar.minesweeper.model.SquareInfo;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -61,14 +64,12 @@ public class MinesweeperPane extends AnchorPane {
     Button clone = new Button("Clone");
 
     newGameButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-      @Override
       public void handle(MouseEvent event) {
         MinesweeperPane.this.field.restart();
       }
     });
 
     clone.setOnMouseClicked(new EventHandler<MouseEvent>() {
-      @Override
       public void handle(MouseEvent event) {
         Parent root = new MinesweeperPane(MinesweeperPane.this);
         eventBus.register(root);
@@ -142,7 +143,6 @@ public class MinesweeperPane extends AnchorPane {
   }
 
   private static abstract class MouseHandler implements EventHandler<MouseEvent> {
-    @Override
     public void handle(MouseEvent e) {
       int row = (int) e.getY() / SQUAREH;
       int col = (int) e.getX() / SQUAREW;
@@ -162,14 +162,14 @@ public class MinesweeperPane extends AnchorPane {
   @Subscribe
   public void cellUpdated(SquareChangeEvent event) {
     int row = event.getRow();
-    int col = event.getColumn();
-    Square square = event.getSquare();
+    int column = event.getColumn();
+    SquareInfo info = field.getSquareAt(row, column);
 
-    if (square == Square.EXPOSED)
-      drawNumber(row, col, field.getMineCount(row, col));
+    if (info.type() == Square.EXPOSED)
+      drawNumber(row, column, info.mineCount());
     else {
       GraphicsContext gc = canvas.getGraphicsContext2D();
-      gc.drawImage(Tiles.getImage(square), col * SQUAREW, row * SQUAREH);
+      gc.drawImage(Tiles.getImage(info.type()), column * SQUAREW, row * SQUAREH);
     }
   }
 
@@ -178,13 +178,16 @@ public class MinesweeperPane extends AnchorPane {
   }
 
   private void drawNumber(int row, int column, int number) {
-    double xDest = column * SQUAREW;
-    double yDest = row * SQUAREH;
-    double xSrc = 0;
-    double ySrc = number * SQUAREH;
+    Rectangle2D src = new Rectangle2D(0, number * SQUAREH, SQUAREW, SQUAREH);
+    Rectangle2D dest = new Rectangle2D(column * SQUAREW, row * SQUAREH, SQUAREW, SQUAREH);
 
-    canvas.getGraphicsContext2D().drawImage(Tiles.NUMBERS, xSrc, ySrc, SQUAREW, SQUAREH, xDest,
-        yDest, SQUAREW, SQUAREH);
+    GraphicsContext gc = canvas.getGraphicsContext2D();
+    drawImageSlice(gc, Tiles.NUMBERS, src, dest);
+  }
+
+  private void drawImageSlice(GraphicsContext gc, Image img, Rectangle2D srcRect, Rectangle2D destRect) {
+    gc.drawImage(img, srcRect.getMinX(), srcRect.getMinY(), srcRect.getWidth(), srcRect.getHeight(),
+      destRect.getMinX(), destRect.getMinY(), destRect.getWidth(), destRect.getHeight());
   }
 
   @Subscribe
@@ -194,13 +197,14 @@ public class MinesweeperPane extends AnchorPane {
 
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
-        Square square = field.getSquareAt(row, col);
+        SquareInfo info = field.getSquareAt(row, col);
 
-        if (square == Square.EXPOSED)
-          drawNumber(row, col, field.getMineCount(row, col));
-        else
-          canvas.getGraphicsContext2D().drawImage(Tiles.getImage(square), col * SQUAREW,
-              row * SQUAREH);
+        if (info.type() == Square.EXPOSED)
+          drawNumber(row, col, info.mineCount());
+        else {
+          GraphicsContext gc = canvas.getGraphicsContext2D();
+          gc.drawImage(Tiles.getImage(info.type()), col * SQUAREW, row * SQUAREH);
+        }
       }
     }
   }

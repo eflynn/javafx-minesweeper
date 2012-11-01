@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkElementIndex;
 
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -111,14 +110,10 @@ public final class Minefield {
    * @return
    */
   public boolean canReveal(int row, int column) {
-    return !gameOver && getSquareAt(row, column) == Square.BLANK;
-  }
-
-  public int getMineCount(int row, int column) {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
 
-    return table[row][column].nearbyMines;
+    return !gameOver && table[row][column].square == Square.BLANK;
   }
 
   /**
@@ -160,18 +155,26 @@ public final class Minefield {
   /**
    * Gets the square at {@code row} and {@code column}
    *
-   * @param rowIndex row to find {@code Square} with
-   * @param columnIndex column to find {@code Square} with
+   * @param row row to find {@code Square} with
+   * @param column column to find {@code Square} with
    * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
    *         {@code getRowCount()}
    * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
    *         {@code getColumnCount()}
    */
-  public Square getSquareAt(int rowIndex, int columnIndex) {
-    checkElementIndex(rowIndex, rows);
-    checkElementIndex(columnIndex, columns);
+  public SquareInfo getSquareAt(final int row, final int column) {
+    checkElementIndex(row, rows);
+    checkElementIndex(column, columns);
 
-    return table[rowIndex][columnIndex].square;
+    return new SquareInfo() {
+      public Square type() {
+        return table[row][column].square;
+      }
+
+      public int mineCount() {
+        return table[row][column].nearbyMines;
+      }
+    };
   }
 
   /**
@@ -281,7 +284,7 @@ public final class Minefield {
     else
       return;
 
-    eventBus.post(new SquareChangeEvent(row, column, entry.square));
+    eventBus.post(new SquareChangeEvent(row, column));
   }
 
   private Entry[] findNeighbors(int row, int column) {
@@ -360,7 +363,7 @@ public final class Minefield {
       if (checkGameWon())
         eventBus.post(gameState);
 
-      eventBus.post(new SquareChangeEvent(entry.row, entry.column, entry.square));
+      eventBus.post(new SquareChangeEvent(entry.row, entry.column));
     }
     else {
       visit(entry);
