@@ -110,8 +110,7 @@ public final class Minefield {
    * @return
    */
   public boolean canReveal(int row, int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
+    checkRowAndColumn(row, column);
 
     return !gameOver && table[row][column].square == Square.BLANK;
   }
@@ -162,17 +161,18 @@ public final class Minefield {
    * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
    *         {@code getColumnCount()}
    */
-  public SquareInfo getSquareAt(final int row, final int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
+  public SquareInfo getSquareAt(int row, int column) {
+    checkRowAndColumn(row, column);
+
+    final Entry entry = table[row][column];
 
     return new SquareInfo() {
       public Square type() {
-        return table[row][column].square;
+        return entry.square;
       }
 
       public int mineCount() {
-        return table[row][column].nearbyMines;
+        return entry.nearbyMines;
       }
     };
   }
@@ -212,8 +212,7 @@ public final class Minefield {
    *         {@code getColumnCount()}
    */
   public void reveal(int row, int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
+    checkRowAndColumn(row, column);
 
     Entry entry = table[row][column];
 
@@ -234,8 +233,7 @@ public final class Minefield {
    *         {@code getColumnCount()}
    */
   public void revealNearby(int row, int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
+    checkRowAndColumn(row, column);
 
     Entry entry = table[row][column];
 
@@ -272,8 +270,7 @@ public final class Minefield {
    *         {@code getColumnCount()}
    */
   public void toggleFlag(int row, int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
+    checkRowAndColumn(row, column);
 
     Entry entry = table[row][column];
 
@@ -285,6 +282,11 @@ public final class Minefield {
       return;
 
     eventBus.post(new SquareChangeEvent(row, column));
+  }
+
+  private checkRowAndColumn(int row, int column) {
+    checkElementIndex(row, rows);
+    checkElementIndex(colum, columns);
   }
 
   private Entry[] findNeighbors(int row, int column) {
