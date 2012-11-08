@@ -163,7 +163,6 @@ public final class Minefield {
    */
   public SquareInfo getSquareAt(int row, int column) {
     checkRowAndColumn(row, column);
-
     final Entry entry = table[row][column];
 
     return new SquareInfo() {
