@@ -283,9 +283,9 @@ public final class Minefield {
     eventBus.post(new SquareChangeEvent(row, column));
   }
 
-  private checkRowAndColumn(int row, int column) {
+  private void checkRowAndColumn(int row, int column) {
     checkElementIndex(row, rows);
-    checkElementIndex(colum, columns);
+    checkElementIndex(column, columns);
   }
 
   private Entry[] findNeighbors(int row, int column) {
