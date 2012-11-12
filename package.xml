@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Minesweeper" default="dist" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
+
+  <!-- Task Definition -->
   <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
            uri="javafx:com.sun.javafx.tools.ant"
            classpath=".:${maven.dependency.com.oracle.ant-javafx.jar.path}"/>
@@ -9,21 +11,13 @@
                   mainClass="${project.javaFX.mainClass}"/>
 
   <fx:resources id="appRes">
-    <fx:fileset dir="${project.build.directory}">
-      <include name="${project.name}.jar"/>
-      <include name="lib/guava-13.0.1.jar"/>
-    </fx:fileset>
+    <fx:fileset dir="${project.build.directory}" includes="${project.name}.jar"/>
   </fx:resources>
 
   <!-- Produces the Jar file with proper manifest -->
   <target name="jar">
-    <mkdir dir="${project.build.directory}/lib"/>
-    <copy file="${maven.dependency.com.google.guava.guava.jar.path}"
-      todir="${project.build.directory}/lib"/>
-
     <fx:jar destfile="${project.build.directory}/${project.name}.jar">
       <fx:application refid="minesweeper"/>
-      <fx:resources refId="appRes"/>
 
       <manifest>
         <attribute name="Implementation-Vendor" value="${project.vendor}"/>
@@ -45,10 +39,7 @@
 
     <fx:signjar keystore="${project.build.directory}/test.keystore"
                 alias="signFiles" storepass="xyz123">
-      <fileset dir="${project.build.directory}">
-        <include name="${project.name}.jar"/>
-        <include name="lib/guava-13.0.1.jar"/>
-      </fileset>
+      <fileset dir="${project.build.directory}" includes="${project.name}.jar"/>
     </fx:signjar>
   </target>
 

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.foobar.minesweeper</groupId>
   <artifactId>minesweeper</artifactId>
-  <version>0.3</version>
+  <version>0.4</version>
   <name>Minesweeper</name>
   <description>
     A Minesweeper game written in Java using JavaFX.
@@ -17,9 +17,9 @@
   </licenses>
   <dependencies>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>13.0.1</version>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <version>2.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.oracle</groupId>
@@ -76,10 +76,32 @@
         </executions>
       </plugin>
       <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.5.1</version>
+        <executions>
+          <execution>
+            <id>unpack-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeScope>runtime</includeScope>
+              <includes>**/*.class</includes>
+              <excludes>**/*.properties</excludes>
+              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+              <overWriteReleases>false</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.3</version>
         <configuration>
-          <finalName>Minesweeper.zip</finalName>
+          <finalName>Minesweeper</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
           <descriptor>src/main/assembly/bin.xml</descriptor>
         </configuration>
       </plugin>

@@ -16,6 +16,10 @@
 
 package org.foobar.minesweeper.event;
 
-public enum BoardChangeEvent {
-  INSTANCE;
+import org.foobar.minesweeper.model.Square;
+
+public interface FieldHandler {
+	void updateSquare(Square square);
+	
+	void updateBoard();		
 }

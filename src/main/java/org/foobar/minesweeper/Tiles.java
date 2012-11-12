@@ -16,11 +16,13 @@
 
 package org.foobar.minesweeper;
 
-import org.foobar.minesweeper.model.Square;
+import org.foobar.minesweeper.model.Squares;
 
 import javafx.scene.image.Image;
 
 public class Tiles {
+	private Tiles() { }
+	
   private static final String baseDir = "resources/";
   public static final Image BLANK = loadImage("blank.png");
   public static final Image FLAG = loadImage("flag.png");
@@ -34,7 +36,7 @@ public class Tiles {
     return new Image(baseDir + path);
   }
   
-  public static Image getImage(Square square) {
+  public static Image getImage(Squares square) {
     switch (square) {
       case BLANK:
         return Tiles.BLANK;

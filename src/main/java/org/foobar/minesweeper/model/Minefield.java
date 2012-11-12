@@ -22,11 +22,10 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.foobar.minesweeper.event.BoardChangeEvent;
-import org.foobar.minesweeper.event.SquareChangeEvent;
-
-import com.google.common.eventbus.EventBus;
+import org.foobar.minesweeper.event.FieldHandler;
+import org.foobar.minesweeper.event.HandlerRegistration;
 
 /**
  * Provides a model for a Minesweeper game. Objects that wish to be notified with updates from this
@@ -53,37 +52,17 @@ public final class Minefield {
     WON;
   }
 
-  static class Entry {
-    final int column;
-    final int row;
-    boolean mine;
-    Square square = Square.BLANK;
-    int nearbyMines = 0;
-
-    Entry(int row, int column) {
-      this.row = row;
-      this.column = column;
-    }
-
-    void onGameLost() {
-      if (mine)
-        square = Square.MINE;
-      else if (square == Square.FLAG)
-        square = Square.WRONGMINE;
-    }
-  }
-
   private final int columns;
+  private final int rows;
+  private final int mines;
   private int unrevealed;
-  private final EventBus eventBus;
   private State gameState;
   private boolean gameOver;
-  private final int mines;
-  private final int rows;
-  private final Entry[][] table;
+  private final Square[][] table;
+	private List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
 
-  public Minefield(EventBus eventBus) {
-    this(eventBus, 10, 10, 10);
+  public Minefield() {
+    this(10, 10, 10);
   }
 
   /**
@@ -93,26 +72,24 @@ public final class Minefield {
    * @param mines
    * @param eventBus
    */
-  public Minefield(EventBus eventBus, int rows, int columns, int mines) {
-    this.eventBus = eventBus;
+  public Minefield(int rows, int columns, int mines) {
     this.rows = rows;
     this.columns = columns;
     this.mines = mines;
-    table = new Entry[rows][columns];
+    
+    table = new Square[rows][columns];
 
     initialize();
   }
-
-  /**
-   *
-   * @param row
-   * @param column
-   * @return
-   */
-  public boolean canReveal(int row, int column) {
-    checkRowAndColumn(row, column);
-
-    return !gameOver && table[row][column].square == Square.BLANK;
+  
+  public HandlerRegistration addFieldHandler(final FieldHandler handler) {
+		handlers.add(handler);
+		
+		return new HandlerRegistration() {
+			public void removeHandler() {
+				handlers.remove(handler);
+			}
+		};
   }
 
   /**
@@ -161,19 +138,11 @@ public final class Minefield {
    * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
    *         {@code getColumnCount()}
    */
-  public SquareInfo getSquareAt(int row, int column) {
-    checkRowAndColumn(row, column);
-    final Entry entry = table[row][column];
-
-    return new SquareInfo() {
-      public Square type() {
-        return entry.square;
-      }
-
-      public int mineCount() {
-        return entry.nearbyMines;
-      }
-    };
+  public Square getSquare(int row, int column) {
+    checkElementIndex(row, rows);
+    checkElementIndex(column, columns);
+    
+    return table[row][column];
   }
 
   /**
@@ -190,109 +159,76 @@ public final class Minefield {
    */
   public void restart() {
     initialize();
-    eventBus.post(BoardChangeEvent.INSTANCE);
+    updateBoard();
   }
 
-  /**
-   * Reveals a cell at row and column. If the cell is a mine, the game is over. If the game is over
-   * or the cell is flagged, the method returns.
-   *
-   * <p>
-   * Calling this method repeatedly with the same row and column will no have no effect until
-   * restart() is called.
-   * </p>
-   *
-   * @param row the row whose cell will be revealed.
-   * @param column the column whose cell will be revealed.
-   *
-   * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
-   *         {@code getRowCount()}
-   * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
-   *         {@code getColumnCount()}
-   */
-  public void reveal(int row, int column) {
-    checkRowAndColumn(row, column);
-
-    Entry entry = table[row][column];
-
-    if (gameOver || entry.square != Square.BLANK)
-      return;
-
-    reveal(table[row][column]);
+  void updateSquare(Square square) {
+  	for(FieldHandler handler : handlers) {
+  		handler.updateSquare(square);
+  	}
   }
-
-  /**
-   *
-   * @param row the row whose flag will be toggled.
-   * @param column the column whose flag will be toggled.
-   *
-   * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
-   *         {@code getRowCount()}
-   * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
-   *         {@code getColumnCount()}
-   */
-  public void revealNearby(int row, int column) {
-    checkRowAndColumn(row, column);
-
-    Entry entry = table[row][column];
-
-    if (gameOver || entry.square != Square.EXPOSED) {
-      return;
+  
+  void reveal(Square square) {
+    if (gameState == State.START) {
+      gameState = State.PLAYING;
+      
+      plantMines(square);
     }
 
-    Entry[] neighbors = findNeighbors(row, column);
+    if (square.hit()) {
+      for (Square[] columns : table) {
+        for (Square i : columns)
+          i.onGameLost();
+      }
+
+      gameOver = true;
+      gameState = State.LOST;
+
+      updateBoard();
+//      eventBus.post(gameState);
+    }
+    else if (square.exposeNumber()) {
+    	unrevealed--;
+
+//      if (checkGameWon())
+//        eventBus.post(gameState);
+
+    	updateSquare(square);
+    }
+    else {
+      visit(square);
+
+      updateBoard();
+    }
+  }
+
+  void revealNearby(Square square) {
+    Square[] neighbors = findNeighbors(square);
     int nearbyFlags = 0;
 
-    for (Entry i : neighbors) {
-      if (i.square == Square.FLAG)
+    for (Square i : neighbors) {
+      if (i.getType() == Squares.FLAG)
         nearbyFlags++;
     }
 
-    if (nearbyFlags == entry.nearbyMines) {
-      for (Entry i : neighbors) {
-        if (i.square == Square.BLANK)
+    if (nearbyFlags == square.getMineCount()) {
+      for (Square i : neighbors) {
+        if (i.getType() == Squares.BLANK)
           reveal(i);
       }
     }
   }
-
-  /**
-   * Toggles the flag state of the cell at row and column. If the game is over or the cell cannot be
-   * flagged (or unflagged), the method returns.
-   *
-   * @param row the row whose flag will be toggled.
-   * @param column the column whose flag will be toggled.
-   *
-   * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
-   *         {@code getRowCount()}
-   * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
-   *         {@code getColumnCount()}
-   */
-  public void toggleFlag(int row, int column) {
-    checkRowAndColumn(row, column);
-
-    Entry entry = table[row][column];
-
-    if (entry.square == Square.FLAG)
-      entry.square = Square.BLANK;
-    else if (entry.square == Square.BLANK)
-      entry.square = Square.FLAG;
-    else
-      return;
-
-    eventBus.post(new SquareChangeEvent(row, column));
+  
+  private void updateBoard() {
+  	for (FieldHandler handler : handlers) {
+  		handler.updateBoard();
+  	}
   }
 
-  private void checkRowAndColumn(int row, int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
-  }
-
-  private Entry[] findNeighbors(int row, int column) {
-    assert row >= 0 && row < rows : "invalid row: " + row;
-    assert column >= 0 && column < columns : "invalid column: " + column;
-
-    Entry[] neighbors = new Entry[8];
+  private Square[] findNeighbors(Square square) {
+  	int row = square.getRow();
+  	int column = square.getColumn();  	
+  	Square[] neighbors = new Square[8];
     int size = 0;
 
     for(int r = row - 1; r <= row + 1; r++) {
@@ -312,13 +248,15 @@ public final class Minefield {
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++)
-        table[r][c] = new Entry(r, c);
+        table[r][c] = new Square(this, r, c);
     }
   }
 
-  private void plantMines(int row, int column) {
-    List<Entry> list = new ArrayList<Entry>(rows * columns);
-
+  private void plantMines(Square square) {
+    ArrayList<Square> list = new ArrayList<Square>(rows * columns);
+    int row = square.getRow();
+    int column = square.getColumn();
+    
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
         if ((r < row - 1 || r > row + 1) && (c < column - 1 || c > column + 1))
@@ -327,58 +265,13 @@ public final class Minefield {
     }
 
     Collections.shuffle(list);
-    List<Entry> mineSet = list.subList(0, mines);
 
-    for (Entry i : mineSet) {
-      i.mine = true;
+    for (Square i : list.subList(0, mines)) {
+    	i.plantMine();
 
-      for (Entry j : findNeighbors(i.row, i.column))
-        j.nearbyMines++;
+      for (Square j : findNeighbors(i))
+      	j.incrementMineCount();
     }
-  }
-
-  private void reveal(Entry entry) {
-    if (gameState == State.START) {
-      gameState = State.PLAYING;
-
-      plantMines(entry.row, entry.column);
-    }
-
-    if (entry.mine) {
-      entry.square = Square.HITMINE;
-
-      for (Entry[] columns : table) {
-        for (Entry i : columns)
-          i.onGameLost();
-      }
-
-      gameOver = true;
-      gameState = State.LOST;
-
-      eventBus.post(BoardChangeEvent.INSTANCE);
-      eventBus.post(gameState);
-    }
-    else if (entry.nearbyMines != 0) {
-      setExposed(entry);
-
-      if (checkGameWon())
-        eventBus.post(gameState);
-
-      eventBus.post(new SquareChangeEvent(entry.row, entry.column));
-    }
-    else {
-      visit(entry);
-
-      eventBus.post(BoardChangeEvent.INSTANCE);
-
-      if (checkGameWon())
-        eventBus.post(gameState);
-    }
-  }
-
-  private void setExposed(Entry entry) {
-    unrevealed--;
-    entry.square = Square.EXPOSED;
   }
 
   private boolean checkGameWon() {
@@ -392,12 +285,13 @@ public final class Minefield {
     return result;
   }
 
-  private void visit(Entry entry) {
-    setExposed(entry);
+  private void visit(Square entry) {
+  	entry.expose();
+  	unrevealed--;
 
-    if (entry.nearbyMines == 0) {
-      for (Entry adj : findNeighbors(entry.row, entry.column)) {
-        if (adj.square != Square.EXPOSED) {
+    if (entry.getMineCount() == 0) {
+      for (Square adj : findNeighbors(entry)) {
+        if (adj.getType() != Squares.EXPOSED) {
           visit(adj);
         }
       }

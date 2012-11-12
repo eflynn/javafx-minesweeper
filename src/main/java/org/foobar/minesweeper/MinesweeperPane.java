@@ -32,36 +32,44 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-import org.foobar.minesweeper.event.BoardChangeEvent;
-import org.foobar.minesweeper.event.SquareChangeEvent;
+import org.foobar.minesweeper.event.FieldHandler;
 import org.foobar.minesweeper.model.Minefield;
+import org.foobar.minesweeper.model.Squares;
 import org.foobar.minesweeper.model.Square;
-import org.foobar.minesweeper.model.SquareInfo;
-
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
 
 public class MinesweeperPane extends AnchorPane {
-  public static final int SQUAREW = 24;
-  public static final int SQUAREH = 24;
+  private static final int SQUAREW = 24;
+  private static final int SQUAREH = 24;
   private final Minefield field;
   private final Canvas canvas = new Canvas(240, 240);
-  private final EventBus eventBus;
+  private final int rows;
+  private final int columns;
 
   private final SelectionModel select = new SelectionModel();
 
   public MinesweeperPane(MinesweeperPane pane) {
-    this(pane.field, pane.eventBus);
+    this(pane.field);
   }
 
-  public MinesweeperPane(Minefield field, final EventBus eventBus) {
+  public MinesweeperPane(Minefield field) {
     this.field = field;
-    this.eventBus = eventBus;
+    rows = field.getRowCount();
+    columns = field.getColumnCount();
 
     installCanvasHandlers();
 
     Button newGameButton = new Button("New Game");
     Button clone = new Button("Clone");
+    
+    field.addFieldHandler(new FieldHandler() {
+			public void updateSquare(Square square) {
+				drawSquare(square);
+			}
+
+			public void updateBoard() {
+				drawBoard();
+			}
+    });
 
     newGameButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
       public void handle(MouseEvent event) {
@@ -72,8 +80,7 @@ public class MinesweeperPane extends AnchorPane {
     clone.setOnMouseClicked(new EventHandler<MouseEvent>() {
       public void handle(MouseEvent event) {
         Parent root = new MinesweeperPane(MinesweeperPane.this);
-        eventBus.register(root);
-
+        
         Stage stage = new Stage();
 
         stage.setResizable(false);
@@ -93,7 +100,23 @@ public class MinesweeperPane extends AnchorPane {
     AnchorPane.setBottomAnchor(canvas, 10.0);
     AnchorPane.setLeftAnchor(canvas, 10.0);
 
-    updateBoard(BoardChangeEvent.INSTANCE);
+    drawBoard();
+  }
+  
+  private void drawSquare(Square s) {
+    if (s.getType() == Squares.EXPOSED)
+      drawNumber(s.getRow(), s.getColumn(), s.getMineCount());
+    else {
+      GraphicsContext gc = canvas.getGraphicsContext2D();
+      gc.drawImage(Tiles.getImage(s.getType()), s.getColumn() * SQUAREW, s.getRow() * SQUAREH);
+    }
+  }
+  
+  private void drawBoard() {
+	  for (int row = 0; row < rows; row++) {
+	  	for (int column = 0; column < columns; column++)
+	  		drawSquare(field.getSquare(row, column));
+	  }
   }
 
   private void installCanvasHandlers() {
@@ -101,10 +124,12 @@ public class MinesweeperPane extends AnchorPane {
     canvas.setOnMousePressed(new MouseHandler() {
       @Override
       public void handle(MouseEvent event, int row, int column) {
+      	Square square = field.getSquare(row, column);
+      	
         if (event.isSecondaryButtonDown()) {
-          field.toggleFlag(row, column);
-        } else if (event.isPrimaryButtonDown() && field.canReveal(row, column)) {
-          drawTile(row, column, Square.EXPOSED);
+        	square.toggleFlag();
+        } else if (event.isPrimaryButtonDown() && square.isRevealable()) {
+          drawTile(row, column, Squares.EXPOSED);
           select.select(row, column);
         }
       }
@@ -115,12 +140,13 @@ public class MinesweeperPane extends AnchorPane {
       public void handle(MouseEvent e, int row, int column) {
         int clicks = e.getClickCount();
         MouseButton button = e.getButton();
+      	Square square = field.getSquare(row, column);
 
-        if ((clicks == 2 && button == PRIMARY) || button == MIDDLE) {
-          field.revealNearby(row, column);
+      	if (button == MIDDLE || (clicks == 2 && button == PRIMARY)) {
+        	square.revealNearby();
         } else if (clicks == 1 && button == PRIMARY) {
           select.clear();
-          field.reveal(row, column);
+          square.reveal();
         }
       }
     });
@@ -130,11 +156,11 @@ public class MinesweeperPane extends AnchorPane {
       public void handle(MouseEvent event, int row, int column) {
         if (event.isPrimaryButtonDown()) {
           if (!select.isEmpty()) {
-            drawTile(select.getSelectedRow(), select.getSelectedColumn(), Square.BLANK);
+            drawTile(select.getSelectedRow(), select.getSelectedColumn(), Squares.BLANK);
           }
 
-          if (field.canReveal(row, column)) {
-            drawTile(row, column, Square.EXPOSED);
+          if (field.getSquare(row, column).isRevealable()) {
+            drawTile(row, column, Squares.EXPOSED);
             select.select(row, column);
           }
         }
@@ -154,27 +180,9 @@ public class MinesweeperPane extends AnchorPane {
     public abstract void handle(MouseEvent t, int row, int column);
   }
 
-  private void drawTile(int row, int column, Square square) {
+  private void drawTile(int row, int column, Squares square) {
     GraphicsContext gc = canvas.getGraphicsContext2D();
     gc.drawImage(Tiles.getImage(square), column * SQUAREW, row * SQUAREH);
-  }
-
-  @Subscribe
-  public void cellUpdated(SquareChangeEvent event) {
-    int row = event.getRow();
-    int column = event.getColumn();
-    SquareInfo info = field.getSquareAt(row, column);
-
-    if (info.type() == Square.EXPOSED)
-      drawNumber(row, column, info.mineCount());
-    else {
-      GraphicsContext gc = canvas.getGraphicsContext2D();
-      gc.drawImage(Tiles.getImage(info.type()), column * SQUAREW, row * SQUAREH);
-    }
-  }
-
-  @Subscribe
-  public void fieldStateChanged(Minefield.State state) {
   }
 
   private void drawNumber(int row, int column, int number) {
@@ -189,23 +197,5 @@ public class MinesweeperPane extends AnchorPane {
     gc.drawImage(img, srcRect.getMinX(), srcRect.getMinY(), srcRect.getWidth(), srcRect.getHeight(),
       destRect.getMinX(), destRect.getMinY(), destRect.getWidth(), destRect.getHeight());
   }
-
-  @Subscribe
-  public void updateBoard(BoardChangeEvent event) {
-    int rows = field.getRowCount();
-    int cols = field.getColumnCount();
-
-    for (int row = 0; row < rows; row++) {
-      for (int col = 0; col < cols; col++) {
-        SquareInfo info = field.getSquareAt(row, col);
-
-        if (info.type() == Square.EXPOSED)
-          drawNumber(row, col, info.mineCount());
-        else {
-          GraphicsContext gc = canvas.getGraphicsContext2D();
-          gc.drawImage(Tiles.getImage(info.type()), col * SQUAREW, row * SQUAREH);
-        }
-      }
-    }
-  }
+  
 }

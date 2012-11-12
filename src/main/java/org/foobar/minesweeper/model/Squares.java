@@ -16,7 +16,6 @@
 
 package org.foobar.minesweeper.model;
 
-public interface SquareInfo {
-  Square type();
-  int mineCount();
+public enum Squares {
+  BLANK, FLAG, MINE, HITMINE, WRONGMINE, EXPOSED
 }

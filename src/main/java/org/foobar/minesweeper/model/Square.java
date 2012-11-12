@@ -16,6 +16,118 @@
 
 package org.foobar.minesweeper.model;
 
-public enum Square {
-  BLANK, FLAG, MINE, HITMINE, WRONGMINE, EXPOSED
+public class Square {
+	private final int column;
+  private final int row;
+  private final Minefield minefield;
+  private boolean mine;
+  private Squares type = Squares.BLANK;
+  private int nearbyMines;
+
+  Square(Minefield minefield, int row, int column) {
+  	this.minefield = minefield;
+    this.row = row;
+    this.column = column;
+  }
+
+  public Squares getType() {
+  	return type;
+  }
+  
+  public boolean isRevealable() {
+  	return !minefield.isGameOver() && type == Squares.BLANK;
+  }
+  
+  public int getRow() {
+  	return row;
+  }
+  
+  public int getColumn() {
+  	return column;
+  }
+  
+  public int getMineCount() {
+  	return nearbyMines;
+  }
+  
+  /**
+   * Toggles the flag state of the square at row and column. If the game is over or the square cannot be
+   * flagged (or unflagged), the method returns.
+   *
+   */
+  public void toggleFlag() {
+    if (type == Squares.FLAG)
+      type = Squares.BLANK;
+    else if (type == Squares.BLANK)
+      type = Squares.FLAG;
+    else
+      return;
+    
+    minefield.updateSquare(this);
+  }
+
+  /**
+   * Reveals a cell at row and column. If the cell is a mine, the game is over. If the game is over
+   * or the cell is flagged, the method returns.
+   *
+   * <p>
+   * Calling this method repeatedly will have no effect until the game is restarted.
+   * </p>
+   */
+  public void reveal() {
+    if (!minefield.isGameOver() && type == Squares.BLANK)
+    	minefield.reveal(this);
+  }
+  
+  public void revealNearby() {
+  	if (!minefield.isGameOver() && type == Squares.EXPOSED)
+  		minefield.revealNearby(this);
+  }
+  
+  void clear() {
+  	type = Squares.BLANK;
+  	mine = false;
+  	nearbyMines = 0;
+  }
+  
+  void incrementMineCount() {
+  	nearbyMines++;
+  }
+  
+  void plantMine() {
+  	mine = true;
+  }
+  
+  boolean isMine() {
+  	return mine;
+  }
+  
+  void expose() {
+  	type = Squares.EXPOSED;
+  }
+  
+  boolean exposeNumber() {
+  	boolean result = nearbyMines > 0;
+  	
+  	if (result)
+  		type = Squares.EXPOSED;
+  	
+  	return result;
+  }
+  
+  boolean hit() {
+  	if (mine)
+  		type = Squares.HITMINE;
+  	
+  	return mine;
+  }
+
+  void onGameLost() {
+    if (mine)
+      type = Squares.MINE;
+    else if (type == Squares.FLAG)
+      type = Squares.WRONGMINE;
+  }
+  
+
 }
