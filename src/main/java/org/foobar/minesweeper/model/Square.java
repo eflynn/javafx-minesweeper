@@ -25,25 +25,30 @@ public class Square {
   private int nearbyMines;
 
   Square(Minefield minefield, int row, int column) {
-  	this.minefield = minefield;
+    this.minefield = minefield;
     this.row = row;
     this.column = column;
   }
 
+  /**
+   * Gets the type of the Square.
+   *
+   * @return type of the Square
+   */
   public Squares getType() {
-  	return type;
+    return type;
   }
-  
+
   public boolean isRevealable() {
-  	return !minefield.isGameOver() && type == Squares.BLANK;
+    return !minefield.isGameOver() && type == Squares.BLANK;
   }
-  
+
   /**
    * Gets the row of the square.
    *
    */
   public int getRow() {
-  	return row;
+    return row;
   }
 
   /**
@@ -51,16 +56,20 @@ public class Square {
    *
    */
   public int getColumn() {
-  	return column;
+    return column;
   }
-  
-  public int getMineCount() {
-  	return nearbyMines;
-  }
-  
+
   /**
-   * Toggles the flag state of the square at row and column. If the game is over or the square cannot be
-   * flagged (or unflagged), the method returns.
+   * Gets the number of nearby mines.
+   *
+   */
+  public int getMineCount() {
+    return nearbyMines;
+  }
+
+  /**
+   * Toggles the flag state of the square at row and column. If the game is over
+   * or the square cannot be flagged (or unflagged), the method returns.
    *
    */
   public void toggleFlag() {
@@ -73,64 +82,65 @@ public class Square {
       type = Squares.FLAG;
     else
       return;
-    
+
     minefield.updateSquare(this);
   }
 
   /**
-   * Reveals a cell at row and column. If the cell is a mine, the game is over. If the game is over
-   * or the cell is flagged, the method returns.
+   * Reveals a cell at row and column. If the cell is a mine, the game is over.
+   * If the game is over or the cell is flagged, the method returns.
    *
    * <p>
-   * Calling this method repeatedly will have no effect until the game is restarted.
+   * Calling this method repeatedly will have no effect until the game is
+   * restarted.
    * </p>
    */
   public void reveal() {
     if (!minefield.isGameOver() && type == Squares.BLANK)
-    	minefield.reveal(this);
+      minefield.reveal(this);
   }
-  
+
   public void revealNearby() {
-  	if (!minefield.isGameOver() && type == Squares.EXPOSED)
-  		minefield.revealNearby(this);
+    if (!minefield.isGameOver() && type == Squares.EXPOSED)
+      minefield.revealNearby(this);
   }
-  
+
   void clear() {
-  	type = Squares.BLANK;
-  	mine = false;
-  	nearbyMines = 0;
+    type = Squares.BLANK;
+    mine = false;
+    nearbyMines = 0;
   }
-  
+
   void incrementMineCount() {
-  	nearbyMines++;
+    nearbyMines++;
   }
-  
+
   void plantMine() {
-  	mine = true;
+    mine = true;
   }
-  
+
   boolean isMine() {
-  	return mine;
+    return mine;
   }
-  
+
   void expose() {
-  	type = Squares.EXPOSED;
+    type = Squares.EXPOSED;
   }
-  
+
   boolean exposeNumber() {
-  	boolean result = nearbyMines > 0;
-  	
-  	if (result)
-  		type = Squares.EXPOSED;
-  	
-  	return result;
+    boolean result = nearbyMines > 0;
+
+    if (result)
+      type = Squares.EXPOSED;
+
+    return result;
   }
-  
+
   boolean hit() {
-  	if (mine)
-  		type = Squares.HITMINE;
-  	
-  	return mine;
+    if (mine)
+      type = Squares.HITMINE;
+
+    return mine;
   }
 
   void onGameLost() {
@@ -139,6 +149,4 @@ public class Square {
     else if (type == Squares.FLAG)
       type = Squares.WRONGMINE;
   }
-  
-
 }
