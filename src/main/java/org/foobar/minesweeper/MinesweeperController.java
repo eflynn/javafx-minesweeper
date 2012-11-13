@@ -53,7 +53,6 @@ public final class MinesweeperController {
     columns = 10;
   }
 
-  @FXML
   public void initialize() {
     field = new Minefield(rows, columns, 10);
 
@@ -68,13 +67,17 @@ public final class MinesweeperController {
     });
   }
 
-  @FXML
-  public void newGame(ActionEvent event) {
+  public void onNewGame(ActionEvent event) {
     field.restart();
   }
 
-  @FXML
-  private void onCanvasClick(MouseEvent event) {
+  public void onClone(ActionEvent event) {
+    // TODO: write me
+
+    System.out.println("onClone method stub");
+  }
+
+  public void onCanvasClicked(MouseEvent event) {
     Square square = findSquare(event);
     int clicks = event.getClickCount();
     MouseButton button = event.getButton();
@@ -88,8 +91,7 @@ public final class MinesweeperController {
     }
   }
 
-  @FXML
-  private void onCanvasPressed(MouseEvent event) {
+  public void onCanvasPressed(MouseEvent event) {
     Square square = findSquare(event);
     int row = square.getRow();
     int column = square.getColumn();

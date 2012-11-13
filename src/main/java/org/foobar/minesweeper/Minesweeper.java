@@ -31,11 +31,9 @@ public class Minesweeper extends Application {
 
   @Override
   public void start(Stage stage) {
-    Scene scene;
-
     // TODO: better exception handling
     try {
-      scene = (Scene) FXMLLoader.load(getClass().getResource(fxml));
+      Scene scene = (Scene) FXMLLoader.load(getClass().getResource(fxml));
       stage.setResizable(false);
       stage.setTitle("Minesweeper");
       stage.setScene(scene);
