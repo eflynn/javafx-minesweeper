@@ -59,7 +59,7 @@ public final class Minefield {
   private State gameState;
   private boolean gameOver;
   private final Square[][] table;
-	private List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
+  private List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
 
   public Minefield() {
     this(10, 10, 10);
@@ -76,20 +76,20 @@ public final class Minefield {
     this.rows = rows;
     this.columns = columns;
     this.mines = mines;
-    
+
     table = new Square[rows][columns];
 
     initialize();
   }
-  
+
   public HandlerRegistration addFieldHandler(final FieldHandler handler) {
-		handlers.add(handler);
-		
-		return new HandlerRegistration() {
-			public void removeHandler() {
-				handlers.remove(handler);
-			}
-		};
+    handlers.add(handler);
+
+    return new HandlerRegistration() {
+      public void removeHandler() {
+        handlers.remove(handler);
+      }
+    };
   }
 
   /**
@@ -141,7 +141,7 @@ public final class Minefield {
   public Square getSquare(int row, int column) {
     checkElementIndex(row, rows);
     checkElementIndex(column, columns);
-    
+
     return table[row][column];
   }
 
@@ -163,15 +163,15 @@ public final class Minefield {
   }
 
   void updateSquare(Square square) {
-  	for(FieldHandler handler : handlers) {
-  		handler.updateSquare(square);
-  	}
+    for(FieldHandler handler : handlers) {
+      handler.updateSquare(square);
+    }
   }
-  
+
   void reveal(Square square) {
     if (gameState == State.START) {
       gameState = State.PLAYING;
-      
+
       plantMines(square);
     }
 
@@ -188,12 +188,12 @@ public final class Minefield {
 //      eventBus.post(gameState);
     }
     else if (square.exposeNumber()) {
-    	unrevealed--;
+      unrevealed--;
 
 //      if (checkGameWon())
 //        eventBus.post(gameState);
 
-    	updateSquare(square);
+      updateSquare(square);
     }
     else {
       visit(square);
@@ -218,17 +218,17 @@ public final class Minefield {
       }
     }
   }
-  
+
   private void updateBoard() {
-  	for (FieldHandler handler : handlers) {
-  		handler.updateBoard();
-  	}
+    for (FieldHandler handler : handlers) {
+      handler.updateBoard();
+    }
   }
 
   private Square[] findNeighbors(Square square) {
-  	int row = square.getRow();
-  	int column = square.getColumn();  	
-  	Square[] neighbors = new Square[8];
+    int row = square.getRow();
+    int column = square.getColumn();
+    Square[] neighbors = new Square[8];
     int size = 0;
 
     for(int r = row - 1; r <= row + 1; r++) {
@@ -256,7 +256,7 @@ public final class Minefield {
     ArrayList<Square> list = new ArrayList<Square>(rows * columns);
     int row = square.getRow();
     int column = square.getColumn();
-    
+
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
         if ((r < row - 1 || r > row + 1) && (c < column - 1 || c > column + 1))
@@ -267,10 +267,10 @@ public final class Minefield {
     Collections.shuffle(list);
 
     for (Square i : list.subList(0, mines)) {
-    	i.plantMine();
+      i.plantMine();
 
       for (Square j : findNeighbors(i))
-      	j.incrementMineCount();
+        j.incrementMineCount();
     }
   }
 
@@ -286,8 +286,8 @@ public final class Minefield {
   }
 
   private void visit(Square entry) {
-  	entry.expose();
-  	unrevealed--;
+    entry.expose();
+    unrevealed--;
 
     if (entry.getMineCount() == 0) {
       for (Square adj : findNeighbors(entry)) {
