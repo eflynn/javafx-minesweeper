@@ -85,6 +85,8 @@ public final class Minefield {
   public HandlerRegistration addFieldHandler(final FieldHandler handler) {
     handlers.add(handler);
 
+    updateBoard();
+
     return new HandlerRegistration() {
       public void removeHandler() {
         handlers.remove(handler);

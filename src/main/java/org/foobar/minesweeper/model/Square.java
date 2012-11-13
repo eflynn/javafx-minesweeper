@@ -17,7 +17,7 @@
 package org.foobar.minesweeper.model;
 
 public class Square {
-	private final int column;
+  private final int column;
   private final int row;
   private final Minefield minefield;
   private boolean mine;
