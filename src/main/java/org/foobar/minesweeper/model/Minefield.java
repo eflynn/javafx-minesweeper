@@ -18,8 +18,8 @@ package org.foobar.minesweeper.model;
 
 import static com.google.common.base.Preconditions.checkElementIndex;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,7 +59,7 @@ public final class Minefield {
   private State gameState;
   private boolean gameOver;
   private final Square[][] table;
-  private List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
+  private final List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
 
   public Minefield() {
     this(10, 10, 10);
@@ -156,7 +156,7 @@ public final class Minefield {
   /**
    * Returns true if the game was won or lost.
    *
-   * @return
+   * @return true if the game was won or lost.
    */
   public boolean isGameOver() {
     return gameOver;
