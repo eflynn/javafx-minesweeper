@@ -38,9 +38,9 @@
             dname="CN=evan.flynn@gmail.com, C=US"/>
 
     <fx:signjar keystore="${project.build.directory}/test.keystore"
-                alias="signFiles" storepass="xyz123">
-      <fileset dir="${project.build.directory}" includes="${project.name}.jar"/>
-    </fx:signjar>
+                alias="signFiles"
+                storepass="xyz123"
+                jar="${project.build.directory}/${project.name}.jar" />
   </target>
 
   <target name="deploy" depends="jar,signjar">
