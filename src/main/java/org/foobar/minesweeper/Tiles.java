@@ -21,9 +21,10 @@ import org.foobar.minesweeper.model.Squares;
 import javafx.scene.image.Image;
 
 public class Tiles {
-	private Tiles() { }
-	
-  private static final String baseDir = "resources/";
+  private Tiles() {
+  }
+
+  private static final String baseDir = "/resources/";
   public static final Image BLANK = loadImage("blank.png");
   public static final Image FLAG = loadImage("flag.png");
   public static final Image EXPOSED = loadImage("exposed.png");
@@ -35,23 +36,23 @@ public class Tiles {
   private static Image loadImage(String path) {
     return new Image(baseDir + path);
   }
-  
+
   public static Image getImage(Squares square) {
     switch (square) {
-      case BLANK:
-        return Tiles.BLANK;
-      case FLAG:
-        return Tiles.FLAG;
-      case MINE:
-        return Tiles.MINE;
-      case EXPOSED:
-        return Tiles.EXPOSED;
-      case HITMINE:
-        return Tiles.HITMINE;
-      case WRONGMINE:
-        return Tiles.WRONGMINE;
-      default:
-        throw new AssertionError("Unknown square type: " + square);
+    case BLANK:
+      return Tiles.BLANK;
+    case FLAG:
+      return Tiles.FLAG;
+    case MINE:
+      return Tiles.MINE;
+    case EXPOSED:
+      return Tiles.EXPOSED;
+    case HITMINE:
+      return Tiles.HITMINE;
+    case WRONGMINE:
+      return Tiles.WRONGMINE;
+    default:
+      throw new AssertionError("Unknown square type: " + square);
     }
   }
 }

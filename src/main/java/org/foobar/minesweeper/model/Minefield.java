@@ -42,7 +42,7 @@ public final class Minefield {
    * been revealed.
    */
   public enum State {
-    /** The game has been lost. */
+    /** Indicates that a mine was tripped and the game is over. */
     LOST,
     /** The game is in progress. */
     PLAYING,
@@ -82,6 +82,12 @@ public final class Minefield {
     initialize();
   }
 
+  /**
+   * Adds a handler for Minefield events.
+   *
+   * @param handler the click handler
+   * @return HandlerRegistration used to remove this handler
+   */
   public HandlerRegistration addFieldHandler(final FieldHandler handler) {
     handlers.add(handler);
 

@@ -38,10 +38,18 @@ public class Square {
   	return !minefield.isGameOver() && type == Squares.BLANK;
   }
   
+  /**
+   * Gets the row of the square.
+   *
+   */
   public int getRow() {
   	return row;
   }
-  
+
+  /**
+   * Gets the column of the square.
+   *
+   */
   public int getColumn() {
   	return column;
   }
@@ -56,6 +64,9 @@ public class Square {
    *
    */
   public void toggleFlag() {
+    if (minefield.isGameOver())
+      return;
+
     if (type == Squares.FLAG)
       type = Squares.BLANK;
     else if (type == Squares.BLANK)
