@@ -185,7 +185,6 @@ public final class Minefield {
       gameState = State.LOST;
 
       updateBoard();
-//      eventBus.post(gameState);
     }
     else if (square.exposeNumber()) {
       unrevealed--;
