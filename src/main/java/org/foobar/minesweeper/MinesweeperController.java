@@ -59,7 +59,7 @@ public final class MinesweeperController {
   @FXML
   public void initialize() {
     field = new Minefield(rows, columns, 10);
-    
+
     field.addFieldHandler(new FieldHandler() {
       public void updateSquare(Square square) {
         drawSquare(square);
@@ -73,17 +73,20 @@ public final class MinesweeperController {
   
   @FXML
   public void newGame(ActionEvent event) {
-//    field.restart();
+    field.restart();
   }
   
-  
-  
-  private void drawSquare(Square s) {
-    if (s.getType() == Squares.EXPOSED)
-      drawNumber(s.getRow(), s.getColumn(), s.getMineCount());
+  private void drawSquare(Square square) {
+    GraphicsContext context = canvas.getGraphicsContext2D();
+
+    if (square.getType() == Squares.EXPOSED) {
+      context.save();
+      context.translate(square.getColumn() * SQUAREW, square.getRow() * SQUAREH);
+      drawImageSlice(context, Tiles.NUMBERS, square.getMineCount() * SQUAREH);
+      context.restore();
+    }
     else {
-      GraphicsContext gc = canvas.getGraphicsContext2D();
-      gc.drawImage(Tiles.getImage(s.getType()), s.getColumn() * SQUAREW, s.getRow() * SQUAREH);
+      context.drawImage(Tiles.getImage(square.getType()), square.getColumn() * SQUAREW, square.getRow() * SQUAREH);
     }
   }
   
@@ -135,17 +138,7 @@ public final class MinesweeperController {
     gc.drawImage(Tiles.getImage(square), column * SQUAREW, row * SQUAREH);
   }
 
-  private void drawNumber(int row, int column, int number) {
-    Rectangle2D src = new Rectangle2D(0, number * SQUAREH, SQUAREW, SQUAREH);
-    Rectangle2D dest = new Rectangle2D(column * SQUAREW, row * SQUAREH, SQUAREW, SQUAREH);
-
-    GraphicsContext gc = canvas.getGraphicsContext2D();
-    drawImageSlice(gc, Tiles.NUMBERS, src, dest);
+  private void drawImageSlice(GraphicsContext gc, Image img, double ySrc) {
+    gc.drawImage(img, 0, ySrc, SQUAREW, SQUAREH, 0, 0, SQUAREW, SQUAREH);
   }
-
-  private void drawImageSlice(GraphicsContext gc, Image img, Rectangle2D srcRect, Rectangle2D destRect) {
-    gc.drawImage(img, srcRect.getMinX(), srcRect.getMinY(), srcRect.getWidth(), srcRect.getHeight(),
-      destRect.getMinX(), destRect.getMinY(), destRect.getWidth(), destRect.getHeight());
-  }
-  
 }
