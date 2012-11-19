@@ -18,7 +18,6 @@ package org.foobar.minesweeper.event;
 
 /**
  * Use the handler registration to remove handlers when they are no longer needed.
- *
  */
 public interface HandlerRegistration {
   /**

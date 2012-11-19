@@ -87,8 +87,8 @@ public class Square {
   }
 
   /**
-   * Reveals a cell at row and column. If the cell is a mine, the game is over.
-   * If the game is over or the cell is flagged, the method returns.
+   * Reveals this square. If the square is a mine, the game is over.
+   * If the game is over or the square is flagged, the method returns.
    *
    * <p>
    * Calling this method repeatedly will have no effect until the game is

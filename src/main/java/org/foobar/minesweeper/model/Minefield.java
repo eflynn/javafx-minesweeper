@@ -29,7 +29,7 @@ import org.foobar.minesweeper.event.HandlerRegistration;
 
 /**
  * Provides a model for a Minesweeper game. Objects that wish to be notified with updates from this
- * class can register with the {@code EventBus}.
+ * class can call {@code addFieldHandler}.
  *
  * @author Evan Flynn
  */
@@ -86,7 +86,7 @@ public final class Minefield {
    * Adds a handler for Minefield events.
    *
    * @param handler the click handler
-   * @return HandlerRegistration used to remove this handler
+   * @return {@code HandlerRegistration} used to remove this handler
    */
   public HandlerRegistration addFieldHandler(final FieldHandler handler) {
     handlers.add(handler);
@@ -137,7 +137,7 @@ public final class Minefield {
   }
 
   /**
-   * Gets the square at {@code row} and {@code column}
+   * Gets the square at {@code row} and {@code column}.
    *
    * @param row row to find {@code Square} with
    * @param column column to find {@code Square} with
@@ -154,9 +154,9 @@ public final class Minefield {
   }
 
   /**
-   * Returns true if the game was won or lost.
+   * Is the game over?
    *
-   * @return true if the game was won or lost.
+   * @return whether the game is over
    */
   public boolean isGameOver() {
     return gameOver;
