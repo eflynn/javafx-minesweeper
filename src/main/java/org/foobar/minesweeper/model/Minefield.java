@@ -31,6 +31,8 @@ import org.foobar.minesweeper.event.HandlerRegistration;
  * Provides a model for a Minesweeper game. Objects that wish to be notified with updates from this
  * class can call {@code addFieldHandler}.
  *
+ * This class is not thread-safe.
+ *
  * @author Evan Flynn
  */
 public final class Minefield {
@@ -60,6 +62,7 @@ public final class Minefield {
   private boolean gameOver;
   private final Square[][] table;
   private final List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
+  private final Square[] mineSet;
 
   public Minefield() {
     this(10, 10, 10);
@@ -76,6 +79,7 @@ public final class Minefield {
     this.rows = rows;
     this.columns = columns;
     this.mines = mines;
+    mineSet = new Square[mines];
 
     table = new Square[rows][columns];
 
@@ -197,10 +201,14 @@ public final class Minefield {
     else if (square.exposeNumber()) {
       unrevealed--;
 
-//      if (checkGameWon())
-//        eventBus.post(gameState);
+      if (checkGameWon()) {
+        for(Square mine : mineSet)
+          mine.onGameWon();
 
-      updateSquare(square);
+        updateBoard();
+      }
+      else
+        updateSquare(square);
     }
     else {
       visit(square);
@@ -272,8 +280,9 @@ public final class Minefield {
     }
 
     Collections.shuffle(list);
+    list.subList(0, mines).toArray(mineSet);
 
-    for (Square i : list.subList(0, mines)) {
+    for (Square i : mineSet) {
       i.plantMine();
 
       for (Square j : findNeighbors(i))
