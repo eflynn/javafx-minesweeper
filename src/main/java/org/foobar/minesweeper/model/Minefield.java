@@ -28,8 +28,8 @@ import org.foobar.minesweeper.event.FieldHandler;
 import org.foobar.minesweeper.event.HandlerRegistration;
 
 /**
- * Provides a model for a Minesweeper game. Objects that wish to be notified with updates from this
- * class can call {@code addFieldHandler}.
+ * Provides a model for a Minesweeper game. Objects that wish to be notified
+ * with updates from this class can call {@code addFieldHandler}.
  *
  * This class is not thread-safe.
  *
@@ -40,8 +40,8 @@ public final class Minefield {
   /**
    * The current state of the game.
    *
-   * The initial state is {@code START}. It changes to {@code PLAYING} when the first square has
-   * been revealed.
+   * The initial state is {@code START}. It changes to {@code PLAYING} when the
+   * first square has been revealed.
    */
   public enum State {
     /** Indicates that a mine was tripped and the game is over. */
@@ -89,7 +89,8 @@ public final class Minefield {
   /**
    * Adds a handler for Minefield events.
    *
-   * @param handler the click handler
+   * @param handler
+   *          the click handler
    * @return {@code HandlerRegistration} used to remove this handler
    */
   public HandlerRegistration addFieldHandler(final FieldHandler handler) {
@@ -143,12 +144,16 @@ public final class Minefield {
   /**
    * Gets the square at {@code row} and {@code column}.
    *
-   * @param row row to find {@code Square} with
-   * @param column column to find {@code Square} with
-   * @throws IndexOutOfBoundsException if {@code row} is negative or greater than or equal to
-   *         {@code getRowCount()}
-   * @throws IndexOutOfBoundsException if {@code column} is negative or greater than or equal to
-   *         {@code getColumnCount()}
+   * @param row
+   *          row to find {@code Square} with
+   * @param column
+   *          column to find {@code Square} with
+   * @throws IndexOutOfBoundsException
+   *           if {@code row} is negative or greater than or equal to
+   *           {@code getRowCount()}
+   * @throws IndexOutOfBoundsException
+   *           if {@code column} is negative or greater than or equal to
+   *           {@code getColumnCount()}
    */
   public Square getSquare(int row, int column) {
     checkElementIndex(row, rows);
@@ -175,7 +180,7 @@ public final class Minefield {
   }
 
   void updateSquare(Square square) {
-    for(FieldHandler handler : handlers) {
+    for (FieldHandler handler : handlers) {
       handler.updateSquare(square);
     }
   }
@@ -189,8 +194,9 @@ public final class Minefield {
 
     if (square.hit()) {
       for (Square[] columns : table) {
-        for (Square i : columns)
+        for (Square i : columns) {
           i.onGameLost();
+        }
       }
 
       gameOver = true;
@@ -202,13 +208,14 @@ public final class Minefield {
       unrevealed--;
 
       if (checkGameWon()) {
-        for(Square mine : mineSet)
+        for (Square mine : mineSet)
           mine.onGameWon();
 
         updateBoard();
       }
-      else
+      else {
         updateSquare(square);
+      }
     }
     else {
       visit(square);
@@ -246,9 +253,10 @@ public final class Minefield {
     Square[] neighbors = new Square[8];
     int size = 0;
 
-    for(int r = row - 1; r <= row + 1; r++) {
-      for(int c = column - 1; c <= column + 1; c++) {
-        if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows && c < columns)
+    for (int r = row - 1; r <= row + 1; r++) {
+      for (int c = column - 1; c <= column + 1; c++) {
+        if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows
+            && c < columns)
           neighbors[size++] = table[r][c];
       }
     }
