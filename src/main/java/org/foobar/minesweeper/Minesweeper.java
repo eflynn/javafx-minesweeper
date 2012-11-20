@@ -16,30 +16,39 @@
 
 package org.foobar.minesweeper;
 
-import java.io.IOException;
-
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import org.foobar.minesweeper.model.Minefield;
+
 public class Minesweeper extends Application {
-  private final static String fxml = "/resources/main_window.fxml";
+  private double nextX = 200.0;
+  private double nextY = 200.0;
 
   public Minesweeper() {
   }
 
   @Override
   public void start(Stage stage) {
-    // TODO: better exception handling
-    try {
-      Scene scene = (Scene) FXMLLoader.load(getClass().getResource(fxml));
-      stage.setResizable(false);
-      stage.setTitle("Minesweeper");
-      stage.setScene(scene);
-      stage.show();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    Minefield field = new Minefield(10, 10, 10);
+
+    showStage(stage, new MinesweeperPane(this, field));
+  }
+
+  public void createAndShowStage(HasParent root) {
+    showStage(new Stage(), root);
+  }
+
+  private void showStage(Stage stage, HasParent root) {
+    stage.setX(nextX);
+    stage.setY(nextY);
+    nextX += 20.0;
+    nextY += 20.0;
+
+    stage.setResizable(false);
+    stage.setTitle("Minesweeper");
+    stage.setScene(new Scene(root.asParent()));
+    stage.show();
   }
 }

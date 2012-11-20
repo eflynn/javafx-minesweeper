@@ -16,25 +16,30 @@
 
 package org.foobar.minesweeper;
 
-import org.foobar.minesweeper.model.Squares;
-
+import static com.google.common.base.Preconditions.checkPositionIndex;
 import javafx.scene.image.Image;
 
-public class Tiles {
-  private Tiles() {
-  }
+import org.foobar.minesweeper.model.Squares;
 
+public class Tiles {
   private static final String baseDir = "/resources/";
   public static final Image BLANK = loadImage("blank.png");
   public static final Image FLAG = loadImage("flag.png");
   public static final Image EXPOSED = loadImage("exposed.png");
-  public static final Image NUMBERS = loadImage("numbers.png");
   public static final Image MINE = loadImage("mine.png");
   public static final Image HITMINE = loadImage("hitmine.png");
   public static final Image WRONGMINE = loadImage("wrongmine.png");
+  private static final Image[] digits = new Image[9];
 
-  private static Image loadImage(String path) {
-    return new Image(baseDir + path);
+  static {
+    digits[0] = EXPOSED;
+
+    for(int i=1; i < digits.length; i++) {
+      digits[i] = loadImage(String.format("number%d.png", i));
+    }
+  }
+
+  private Tiles() {
   }
 
   public static Image getImage(Squares square) {
@@ -54,5 +59,15 @@ public class Tiles {
     default:
       throw new AssertionError("Unknown square type: " + square);
     }
+  }
+
+  public static Image getDigit(int index) {
+    checkPositionIndex(index, 8);
+
+    return digits[index];
+  }
+
+  private static Image loadImage(String path) {
+    return new Image(baseDir + path);
   }
 }

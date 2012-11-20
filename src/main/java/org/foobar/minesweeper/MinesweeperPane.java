@@ -1,0 +1,186 @@
+/*
+ * Copyright 2012 Evan Flynn
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.foobar.minesweeper;
+
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Parent;
+import javafx.scene.control.ButtonBuilder;
+import javafx.scene.control.Label;
+import javafx.scene.control.LabelBuilder;
+import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPaneBuilder;
+import javafx.scene.layout.HBoxBuilder;
+
+import org.foobar.minesweeper.event.FieldHandler;
+import org.foobar.minesweeper.model.Minefield;
+import org.foobar.minesweeper.model.Square;
+import org.foobar.minesweeper.model.Squares;
+
+public final class MinesweeperPane implements HasParent {
+  private final Parent root;
+  private final Label status;
+
+  private final int rows;
+  private final int columns;
+  private final Minefield field;
+  private final FieldCanvas canvas;
+  private final Minesweeper appController;
+
+  public MinesweeperPane(Minesweeper appController, Minefield field) {
+    this.appController = appController;
+    this.field = field;
+    rows = field.getRowCount();
+    columns = field.getColumnCount();
+
+    canvas = new FieldCanvas();
+    canvas.setLayoutX(14);
+    canvas.setLayoutY(49.0);
+    canvas.setWidth(240);
+    canvas.setHeight(240);
+    canvas.setOnMouseClicked(new EventHandler<MouseEvent>() {
+      public void handle(MouseEvent event) {
+        onCanvasClicked(event);
+      }
+    });
+
+    canvas.setOnMousePressed(new EventHandler<MouseEvent>() {
+      public void handle(MouseEvent event) {
+        onCanvasPressed(event);
+      }
+    });
+
+    root = AnchorPaneBuilder.create()
+        .prefHeight(308)
+        .prefWidth(268)
+        .children(
+            HBoxBuilder.create()
+            .layoutX(14)
+            .layoutY(14)
+            .spacing(10)
+            .children(
+                ButtonBuilder.create()
+                .text("_New Game")
+                .onAction(new EventHandler<ActionEvent>() {
+                  public void handle(ActionEvent arg0) {
+                    onNewGame();
+                  }
+                }).build(),
+                ButtonBuilder.create()
+                .text("_Clone")
+                .onAction(new EventHandler<ActionEvent>() {
+                  public void handle(ActionEvent arg0) {
+                    onClone();
+                  }
+                }).build()
+            ).build(),
+         canvas,
+         status = LabelBuilder.create()
+         .text("blah")
+         .layoutX(14)
+         .layoutY(290).build()
+        ).build();
+
+    field.addFieldHandler(new FieldHandler() {
+      public void updateSquare(Square square) {
+        drawSquare(square);
+      }
+
+      public void updateBoard() {
+        drawBoard();
+      }
+    });
+  }
+
+  public MinesweeperPane(MinesweeperPane pane) {
+    this(pane.appController, pane.field);
+  }
+
+  public Parent asParent() {
+    return root;
+  }
+
+  private void onNewGame() {
+    field.restart();
+  }
+
+  private void onClone() {
+    appController.createAndShowStage(new MinesweeperPane(this));
+  }
+
+  private void onCanvasClicked(MouseEvent event) {
+    Square square = findSquare(event);
+    int clicks = event.getClickCount();
+    MouseButton button = event.getButton();
+
+    if (button == MouseButton.MIDDLE
+        || (clicks == 2 && button == MouseButton.PRIMARY)) {
+      square.revealNearby();
+    } else if (clicks == 1 && button == MouseButton.PRIMARY) {
+      canvas.clearSelection();
+      square.reveal();
+    }
+  }
+
+  private void onCanvasPressed(MouseEvent event) {
+    Square square = findSquare(event);
+    int row = square.getRow();
+    int column = square.getColumn();
+
+    if (event.isSecondaryButtonDown()) {
+      square.toggleFlag();
+    } else if (event.isPrimaryButtonDown() && square.isRevealable()) {
+      canvas.setSelection(row, column);
+    }
+  }
+
+  private void drawSquare(Square square) {
+    Image image = square.getType() == Squares.EXPOSED ? Tiles.getDigit(square
+        .getMineCount()) : Tiles.getImage(square.getType());
+
+    canvas.drawImage(square.getRow(), square.getColumn(), image);
+  }
+
+  private void drawBoard() {
+    for (int row = 0; row < rows; row++) {
+      for (int column = 0; column < columns; column++)
+        drawSquare(field.getSquare(row, column));
+    }
+
+    String text;
+
+    switch(field.getGameState()) {
+    case LOST:
+      text = "You lost! Click New Game to try again.";
+      break;
+    case WON:
+      text = "Congratulations, you won!";
+      break;
+    default:
+      text = "";
+    }
+
+    status.setText(text);
+  }
+
+  private Square findSquare(MouseEvent event) {
+    return field.getSquare(canvas.scaleRow(event.getY()),
+        canvas.scaleColumn(event.getX()));
+  }
+}
