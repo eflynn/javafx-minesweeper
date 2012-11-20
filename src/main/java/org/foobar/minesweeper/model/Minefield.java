@@ -16,6 +16,7 @@
 
 package org.foobar.minesweeper.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 
 import java.util.ArrayList;
@@ -64,18 +65,22 @@ public final class Minefield {
   private final List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
   private final Square[] mineSet;
 
-  public Minefield() {
-    this(10, 10, 10);
-  }
-
   /**
+   * Creates a {@code Minefield}.
    *
-   * @param rows
-   * @param columns
-   * @param mines
-   * @param eventBus
+   * @param rows the number of rows in the {@code Minefield}
+   * @param columns the number of columns in the {@code Minefield}
+   * @param mines the number of mines in the {@code Minefield}
+   * @throws IllegalArgumentException if {@code rows}, {@code columns}, or
+   *           {@code mines} is negative.
    */
   public Minefield(int rows, int columns, int mines) {
+    // TODO: only does basic checks for sanity.
+
+    checkArgument(rows > 0, "rows must be positive: %s", rows);
+    checkArgument(columns > 0, "columns must be positive: %s", columns);
+    checkArgument(mines > 0, "mines must be positive: %s", mines);
+
     this.rows = rows;
     this.columns = columns;
     this.mines = mines;
@@ -89,8 +94,7 @@ public final class Minefield {
   /**
    * Adds a handler for Minefield events.
    *
-   * @param handler
-   *          the click handler
+   * @param handler the click handler
    * @return {@code HandlerRegistration} used to remove this handler
    */
   public HandlerRegistration addFieldHandler(final FieldHandler handler) {
@@ -144,16 +148,13 @@ public final class Minefield {
   /**
    * Gets the square at {@code row} and {@code column}.
    *
-   * @param row
-   *          row to find {@code Square} with
-   * @param column
-   *          column to find {@code Square} with
-   * @throws IndexOutOfBoundsException
-   *           if {@code row} is negative or greater than or equal to
-   *           {@code getRowCount()}
-   * @throws IndexOutOfBoundsException
-   *           if {@code column} is negative or greater than or equal to
-   *           {@code getColumnCount()}
+   * @param row row to find {@code Square} with
+   * @param column column to find {@code Square} with
+   * @throws IndexOutOfBoundsException if {@code row} is negative or greater
+   *           than or equal to {@code getRowCount()}
+   * @throws IndexOutOfBoundsException if {@code column} is negative or greater
+   *           than or equal to {@code getColumnCount()}
+   * @returns square at {@code row} and {@code column}
    */
   public Square getSquare(int row, int column) {
     checkElementIndex(row, rows);
