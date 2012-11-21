@@ -146,6 +146,9 @@ public class Square {
   }
 
   void onGameLost() {
+    if (type == Squares.HITMINE)
+      return;
+
     if (mine)
       type = Squares.MINE;
     else if (type == Squares.FLAG)
