@@ -16,10 +16,13 @@
 
 package org.foobar.minesweeper.event;
 
+import org.foobar.minesweeper.model.Minefield;
 import org.foobar.minesweeper.model.Square;
 
 public interface FieldHandler {
-	void updateSquare(Square square);
-	
-	void updateBoard();		
+  void updateSquare(Square square);
+
+  void updateBoard();
+
+  void changeState(Minefield.State state);
 }

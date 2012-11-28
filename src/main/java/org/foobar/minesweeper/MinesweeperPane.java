@@ -30,6 +30,7 @@ import javafx.scene.layout.HBoxBuilder;
 
 import org.foobar.minesweeper.event.FieldHandler;
 import org.foobar.minesweeper.model.Minefield;
+import org.foobar.minesweeper.model.Minefield.State;
 import org.foobar.minesweeper.model.Square;
 import org.foobar.minesweeper.model.Squares;
 
@@ -92,18 +93,22 @@ public final class MinesweeperPane implements HasParent {
             ).build(),
          canvas,
          status = LabelBuilder.create()
-         .text("blah")
+         .text("")
          .layoutX(14)
          .layoutY(290).build()
         ).build();
 
     field.addFieldHandler(new FieldHandler() {
-      public void updateSquare(Square square) {
+      @Override public void updateSquare(Square square) {
         drawSquare(square);
       }
 
-      public void updateBoard() {
+      @Override public void updateBoard() {
         drawBoard();
+      }
+
+      @Override public void changeState(State state) {
+        updateText(state);
       }
     });
   }
@@ -128,6 +133,8 @@ public final class MinesweeperPane implements HasParent {
     Square square = findSquare(event);
     int clicks = event.getClickCount();
     MouseButton button = event.getButton();
+
+    // FIXME: square doesn't always redraw after mouse click
 
     if (button == MouseButton.MIDDLE
         || (clicks == 2 && button == MouseButton.PRIMARY)) {
@@ -157,15 +164,10 @@ public final class MinesweeperPane implements HasParent {
     canvas.drawImage(square.getRow(), square.getColumn(), image);
   }
 
-  private void drawBoard() {
-    for (int row = 0; row < rows; row++) {
-      for (int column = 0; column < columns; column++)
-        drawSquare(field.getSquare(row, column));
-    }
-
+  private void updateText(Minefield.State state) {
     String text;
 
-    switch(field.getGameState()) {
+    switch(state) {
     case LOST:
       text = "You lost! Click New Game to try again.";
       break;
@@ -177,6 +179,14 @@ public final class MinesweeperPane implements HasParent {
     }
 
     status.setText(text);
+  }
+
+  private void drawBoard() {
+    for (int row = 0; row < rows; row++) {
+      for (int column = 0; column < columns; column++) {
+        drawSquare(field.getSquare(row, column));
+      }
+    }
   }
 
   private Square findSquare(MouseEvent event) {
