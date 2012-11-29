@@ -13,7 +13,6 @@
         <include>*.html</include>
         <include>*.jar</include>
         <include>*.jnlp</include>
-        <include>lib/</include>
       </includes>
     </fileSet>
   </fileSets> 

@@ -10,20 +10,18 @@
                   mainClass="${project.javaFX.mainClass}"/>
 
   <fx:resources id="appRes">
-    <fx:fileset dir="${project.build.directory}" includes="${project.name}.jar"/>
+    <fx:fileset dir="${project.build.directory}" includes="${project.filename}.jar"/>
   </fx:resources>
 
   <!-- Produces the Jar file with proper manifest -->
   <target name="jar">
-    <fx:jar destfile="${project.build.directory}/${project.name}.jar">
+    <fx:jar destfile="${project.build.directory}/${project.filename}.jar">
       <fx:application refid="minesweeper"/>
-
       <manifest>
         <attribute name="Implementation-Vendor" value="${project.vendor}"/>
         <attribute name="Implementation-Title" value="${project.name}"/>
         <attribute name="Implementation-Version" value="1.0"/>
       </manifest>
-
       <fileset dir="${project.build.outputDirectory}"/>
     </fx:jar>
   </target>
@@ -32,11 +30,13 @@
     <fx:deploy width="260"
                height="300"
                outdir="${project.build.directory}"
-               outfile="${project.name}"
+               outfile="${project.filename}"
                embedJNLP="true">
       <fx:info title="${project.name}" />
       <fx:application refId="minesweeper"/>
-      <fx:resources refId="appRes"/>
+      <fx:resources>
+        <fx:fileset dir="${project.build.directory}" includes="${project.filename}.jar"/>
+      </fx:resources>
     </fx:deploy>
   </target>
 </project>
