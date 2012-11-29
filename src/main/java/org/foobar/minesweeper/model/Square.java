@@ -16,6 +16,8 @@
 
 package org.foobar.minesweeper.model;
 
+import java.util.List;
+
 public class Square {
   private final int column;
   private final int row;
@@ -104,7 +106,7 @@ public class Square {
    * restarted.
    */
   public void reveal() {
-    if (!minefield.isGameOver() && type == Squares.BLANK)
+    if (type == Squares.BLANK)
       minefield.reveal(this);
   }
 
@@ -113,42 +115,44 @@ public class Square {
    * work. Otherwise, the method returns with no change.
    */
   public void revealNearby() {
-    if (!minefield.isGameOver() && type == Squares.EXPOSED)
-      minefield.revealNearby(this);
+    if (minefield.isGameOver() || type != Squares.EXPOSED)
+      return;
+
+    List<Square> neighbors = minefield.findNeighbors(this);
+    int nearbyFlags = 0;
+
+    for (Square square : neighbors) {
+      if (square.type == Squares.FLAG) {
+        nearbyFlags++;
+      }
+    }
+
+    if (nearbyFlags == nearbyMines) {
+      for (Square square : neighbors) {
+        square.reveal();
+      }
+    }
   }
 
-  void incrementMineCount() {
-    nearbyMines++;
+  void hit() {
+    assert mine;
+
+    type = Squares.HITMINE;
   }
 
-  void plantMine() {
-    mine = true;
-  }
-
-  void expose() {
-    type = Squares.EXPOSED;
-  }
-
-  boolean exposeNumber() {
-    boolean result = nearbyMines > 0;
-
-    if (result)
-      type = Squares.EXPOSED;
-
-    return result;
-  }
-
-  boolean hit() {
-    if (mine)
-      type = Squares.HITMINE;
-
+  boolean isMine() {
     return mine;
   }
 
-  void onGameLost() {
-    if (type == Squares.HITMINE)
-      return;
+  void setMine(List<Square> neighbors) {
+    mine = true;
 
+    for(Square square : neighbors) {
+      square.nearbyMines++;
+    }
+  }
+
+  void onGameLost() {
     if (mine)
       type = Squares.MINE;
     else if (type == Squares.FLAG)
@@ -158,5 +162,20 @@ public class Square {
   void onGameWon() {
     if (mine)
       type = Squares.FLAG;
+  }
+
+  int visit() {
+    int exposed = 1;
+    type = Squares.EXPOSED;
+
+    if (nearbyMines == 0) {
+      for (Square square : minefield.findNeighbors(this)) {
+        if (square.type != Squares.EXPOSED) {
+          exposed += square.visit();
+        }
+      }
+    }
+
+    return exposed;
   }
 }

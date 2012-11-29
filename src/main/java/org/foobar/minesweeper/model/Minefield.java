@@ -20,9 +20,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.foobar.minesweeper.event.FieldHandler;
@@ -63,7 +63,8 @@ public final class Minefield {
   private boolean gameOver;
   private final Square[][] table;
   private final List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
-  private final Square[] mineSet;
+  private final List<Square> mineSet = new ArrayList<>();
+  private final Random random;
 
   /**
    * Creates a {@code Minefield}.
@@ -75,7 +76,11 @@ public final class Minefield {
    *           {@code mines} is negative.
    */
   public Minefield(int rows, int columns, int mines) {
-    // TODO: only does basic checks for sanity.
+    this(rows, columns, mines, new Random());
+  }
+
+  public Minefield(int rows, int columns, int mines, Random random) {
+    // FIXME: only does basic checks for sanity.
 
     checkArgument(rows > 0, "rows must be positive: %s", rows);
     checkArgument(columns > 0, "columns must be positive: %s", columns);
@@ -84,11 +89,11 @@ public final class Minefield {
     this.rows = rows;
     this.columns = columns;
     this.mines = mines;
-    mineSet = new Square[mines];
+    this.random = random;
 
     table = new Square[rows][columns];
 
-    initialize();
+    restart();
   }
 
   /**
@@ -103,7 +108,7 @@ public final class Minefield {
     updateBoard();
 
     return new HandlerRegistration() {
-      public void removeHandler() {
+      @Override public void removeHandler() {
         handlers.remove(handler);
       }
     };
@@ -176,8 +181,19 @@ public final class Minefield {
    * Restarts the Minesweeper game.
    */
   public void restart() {
-    initialize();
+    mineSet.clear();
+    unrevealed = (rows * columns) - mines;
+    gameState = State.START;
+    gameOver = false;
+
+    for (int r = 0; r < rows; r++) {
+      for (int c = 0; c < columns; c++) {
+        table[r][c] = new Square(this, r, c);
+      }
+    }
+
     updateBoard();
+    updateState();
   }
 
   void updateSquare(Square square) {
@@ -186,140 +202,110 @@ public final class Minefield {
     }
   }
 
-  void reveal(Square square) {
-    if (gameState == State.START) {
-      gameState = State.PLAYING;
+  private void firstClick(Square first) {
+    gameState = State.PLAYING;
 
-      plantMines(square);
-    }
+    List<Square> flat = new ArrayList<>(rows * columns);
 
-    if (square.hit()) {
-      for (Square[] columns : table) {
-        for (Square i : columns) {
-          i.onGameLost();
+    for(int i=0; i<rows; i++) {
+      for(int j=0; j<columns; j++) {
+        if (table[i][j] != first) {
+          flat.add(table[i][j]);
         }
       }
+    }
 
+    Collections.shuffle(flat, random);
+
+    mineSet.addAll(flat.subList(0, mines));
+
+    for(Square s : mineSet) {
+      s.setMine(findNeighbors(s));
+    }
+  }
+
+  void reveal(Square square) {
+    if (gameOver)
+      return;
+
+    if (gameState == State.START) {
+      firstClick(square);
+
+      cascade(square);
+      return;
+    }
+
+    if (square.isMine())
+      onGameLost(square);
+    else
+      cascade(square);
+  }
+
+  private void cascade(Square square) {
+    int exposed = square.visit();
+
+    unrevealed -= exposed;
+
+    if (exposed == 1)
+      updateSquare(square);
+    else
+      updateBoard();
+
+    if (unrevealed == 0) {
       gameOver = true;
-      gameState = State.LOST;
-
-      updateBoard();
+      gameState = State.WON;
+      updateState();
     }
-    else if (square.exposeNumber()) {
-      unrevealed--;
 
-      if (checkGameWon()) {
-        for (Square mine : mineSet)
-          mine.onGameWon();
-
-        updateBoard();
-      }
-      else {
-        updateSquare(square);
-      }
-    }
-    else {
-      visit(square);
-
-      updateBoard();
-    }
+    //FIXME: call onGameWon()
   }
 
-  void revealNearby(Square square) {
-    Square[] neighbors = findNeighbors(square);
-    int nearbyFlags = 0;
+  List<Square> getMineSet() {
+    return mineSet;
+  }
 
-    for (Square i : neighbors) {
-      if (i.getType() == Squares.FLAG)
-        nearbyFlags++;
-    }
+  void onGameLost(Square square) {
+    square.hit();
 
-    if (nearbyFlags == square.getMineCount()) {
-      for (Square i : neighbors) {
-        if (i.getType() == Squares.BLANK)
-          reveal(i);
+    for (Square[] columns : table) {
+      for (Square i : columns) {
+        if (i != square)
+          i.onGameLost();
       }
     }
+
+    gameOver = true;
+    gameState = State.LOST;
+
+    updateBoard();
+    updateState();
   }
 
-  private void updateBoard() {
-    for (FieldHandler handler : handlers) {
-      handler.updateBoard();
-    }
-  }
-
-  private Square[] findNeighbors(Square square) {
+  List<Square> findNeighbors(Square square) {
+    List<Square> neighbors = new ArrayList<>(8);
     int row = square.getRow();
     int column = square.getColumn();
-    Square[] neighbors = new Square[8];
-    int size = 0;
 
     for (int r = row - 1; r <= row + 1; r++) {
       for (int c = column - 1; c <= column + 1; c++) {
         if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows
             && c < columns)
-          neighbors[size++] = table[r][c];
+          neighbors.add(table[r][c]);
       }
     }
 
-    return Arrays.copyOf(neighbors, size);
+    return neighbors;
   }
 
-  private void initialize() {
-    unrevealed = (rows * columns) - mines;
-    gameState = State.START;
-    gameOver = false;
-
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < columns; c++)
-        table[r][c] = new Square(this, r, c);
+  void updateBoard() {
+    for (FieldHandler handler : handlers) {
+      handler.updateBoard();
     }
   }
 
-  private void plantMines(Square square) {
-    ArrayList<Square> list = new ArrayList<Square>(rows * columns);
-    int row = square.getRow();
-    int column = square.getColumn();
-
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < columns; c++) {
-        if ((r < row - 1 || r > row + 1) && (c < column - 1 || c > column + 1))
-          list.add(table[r][c]);
-      }
-    }
-
-    Collections.shuffle(list);
-    list.subList(0, mines).toArray(mineSet);
-
-    for (Square i : mineSet) {
-      i.plantMine();
-
-      for (Square j : findNeighbors(i))
-        j.incrementMineCount();
-    }
-  }
-
-  private boolean checkGameWon() {
-    boolean result = (unrevealed == 0);
-
-    if (result) {
-      gameOver = true;
-      gameState = State.WON;
-    }
-
-    return result;
-  }
-
-  private void visit(Square entry) {
-    entry.expose();
-    unrevealed--;
-
-    if (entry.getMineCount() == 0) {
-      for (Square adj : findNeighbors(entry)) {
-        if (adj.getType() != Squares.EXPOSED) {
-          visit(adj);
-        }
-      }
+  private void updateState() {
+    for (FieldHandler handler : handlers) {
+      handler.changeState(gameState);
     }
   }
 }
