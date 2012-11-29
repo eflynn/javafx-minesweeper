@@ -81,7 +81,7 @@
             <phase>package</phase>
             <configuration>
               <target>
-                <ant antfile="package.xml" target="deploy" />
+                <ant antfile="package.xml" />
               </target>
             </configuration>
             <goals>
