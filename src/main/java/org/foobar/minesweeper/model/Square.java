@@ -106,8 +106,17 @@ public class Square {
    * restarted.
    */
   public void reveal() {
-    if (type == Squares.BLANK)
+    if (type != Squares.BLANK || minefield.isGameOver())
+      return;
+
+    if (mine) {
+      type = Squares.HITMINE;
+      mine = false;
+      minefield.onGameLost();
+    }
+    else {
       minefield.reveal(this);
+    }
   }
 
   /**
@@ -132,12 +141,6 @@ public class Square {
         square.reveal();
       }
     }
-  }
-
-  void hit() {
-    assert mine;
-
-    type = Squares.HITMINE;
   }
 
   boolean isMine() {

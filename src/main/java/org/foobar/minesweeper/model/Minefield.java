@@ -79,7 +79,7 @@ public final class Minefield {
     this(rows, columns, mines, new Random());
   }
 
-  public Minefield(int rows, int columns, int mines, Random random) {
+  Minefield(int rows, int columns, int mines, Random random) {
     // FIXME: only does basic checks for sanity.
 
     checkArgument(rows > 0, "rows must be positive: %s", rows);
@@ -183,8 +183,6 @@ public final class Minefield {
   public void restart() {
     mineSet.clear();
     unrevealed = (rows * columns) - mines;
-    gameState = State.START;
-    gameOver = false;
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
@@ -193,12 +191,74 @@ public final class Minefield {
     }
 
     updateBoard();
-    updateState();
+    setState(State.START);
   }
 
   void updateSquare(Square square) {
     for (FieldHandler handler : handlers) {
       handler.updateSquare(square);
+    }
+  }
+
+  void reveal(Square square) {
+    assert !gameOver && square.getType() == Squares.BLANK;
+
+    if (gameState == State.START)
+      firstClick(square);
+
+    cascade(square);
+  }
+
+  void onGameLost() {
+    for (Square[] columns : table) {
+      for (Square i : columns) {
+        i.onGameLost();
+      }
+    }
+
+    updateBoard();
+    setState(State.LOST);
+  }
+
+  List<Square> findNeighbors(Square square) {
+    List<Square> neighbors = new ArrayList<>(8);
+    int row = square.getRow();
+    int column = square.getColumn();
+
+    for (int r = row - 1; r <= row + 1; r++) {
+      for (int c = column - 1; c <= column + 1; c++) {
+        if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows
+            && c < columns)
+          neighbors.add(table[r][c]);
+      }
+    }
+
+    return neighbors;
+  }
+
+  void updateBoard() {
+    for (FieldHandler handler : handlers) {
+      handler.updateBoard();
+    }
+  }
+
+  private void cascade(Square square) {
+    int exposed = square.visit();
+
+    unrevealed -= exposed;
+
+    if (unrevealed == 0) {
+      for(Square s : mineSet)
+        s.onGameWon();
+
+      setState(State.WON);
+      updateBoard();
+    }
+    else if (exposed == 1) {
+      updateSquare(square);
+    }
+    else {
+      updateBoard();
     }
   }
 
@@ -224,88 +284,14 @@ public final class Minefield {
     }
   }
 
-  void reveal(Square square) {
-    if (gameOver)
-      return;
+  private void setState(State aState) {
+    if (aState != gameState) {
+      gameState = aState;
+      gameOver = aState == State.LOST || aState == State.WON;
 
-    if (gameState == State.START) {
-      firstClick(square);
-
-      cascade(square);
-      return;
-    }
-
-    if (square.isMine())
-      onGameLost(square);
-    else
-      cascade(square);
-  }
-
-  private void cascade(Square square) {
-    int exposed = square.visit();
-
-    unrevealed -= exposed;
-
-    if (exposed == 1)
-      updateSquare(square);
-    else
-      updateBoard();
-
-    if (unrevealed == 0) {
-      gameOver = true;
-      gameState = State.WON;
-      updateState();
-    }
-
-    //FIXME: call onGameWon()
-  }
-
-  List<Square> getMineSet() {
-    return mineSet;
-  }
-
-  void onGameLost(Square square) {
-    square.hit();
-
-    for (Square[] columns : table) {
-      for (Square i : columns) {
-        if (i != square)
-          i.onGameLost();
+      for (FieldHandler handler : handlers) {
+        handler.changeState(gameState);
       }
-    }
-
-    gameOver = true;
-    gameState = State.LOST;
-
-    updateBoard();
-    updateState();
-  }
-
-  List<Square> findNeighbors(Square square) {
-    List<Square> neighbors = new ArrayList<>(8);
-    int row = square.getRow();
-    int column = square.getColumn();
-
-    for (int r = row - 1; r <= row + 1; r++) {
-      for (int c = column - 1; c <= column + 1; c++) {
-        if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows
-            && c < columns)
-          neighbors.add(table[r][c]);
-      }
-    }
-
-    return neighbors;
-  }
-
-  void updateBoard() {
-    for (FieldHandler handler : handlers) {
-      handler.updateBoard();
-    }
-  }
-
-  private void updateState() {
-    for (FieldHandler handler : handlers) {
-      handler.changeState(gameState);
     }
   }
 }
