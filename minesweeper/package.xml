@@ -9,10 +9,6 @@
                   name="${project.name}"
                   mainClass="${project.javaFX.mainClass}"/>
 
-  <fx:resources id="appRes">
-    <fx:fileset dir="${project.build.directory}" includes="${project.filename}.jar"/>
-  </fx:resources>
-
   <!-- Produces the Jar file with proper manifest -->
   <target name="jar">
     <fx:jar destfile="${project.build.directory}/${project.filename}.jar">
