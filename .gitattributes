@@ -1,2 +1,7 @@
 * text=auto
 
+# Source files
+*.java text
+
+# Binary files
+*.png binary
