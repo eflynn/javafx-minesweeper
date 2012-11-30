@@ -29,8 +29,7 @@ public class Minesweeper extends Application {
   public Minesweeper() {
   }
 
-  @Override
-  public void start(Stage stage) {
+  @Override public void start(Stage stage) {
     Minefield field = new Minefield(10, 10, 10);
 
     showStage(stage, new MinesweeperPane(this, field));
