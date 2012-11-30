@@ -25,8 +25,8 @@ import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPaneBuilder;
 import javafx.scene.layout.HBoxBuilder;
+import javafx.scene.layout.PaneBuilder;
 
 import org.foobar.minesweeper.event.FieldHandler;
 import org.foobar.minesweeper.model.Minefield;
@@ -67,7 +67,11 @@ public final class MinesweeperPane implements HasParent {
       }
     });
 
-    root = AnchorPaneBuilder.create()
+    root = PaneBuilder.create()
+        .style("-fx-border-color: black;"
+            + "-fx-border-width: 1;"
+            + "-fx-border-radius: 6;"
+            + "-fx-padding: 6;")
         .prefHeight(308)
         .prefWidth(268)
         .children(

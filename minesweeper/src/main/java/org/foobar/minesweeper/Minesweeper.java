@@ -17,11 +17,21 @@
 package org.foobar.minesweeper;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import org.foobar.minesweeper.model.Minefield;
 
+/**
+ * The application class for JavaFX Minesweeper
+ *
+ */
 public class Minesweeper extends Application {
   private double nextX = 200.0;
   private double nextY = 200.0;
@@ -30,9 +40,39 @@ public class Minesweeper extends Application {
   }
 
   @Override public void start(Stage stage) {
+    Pane group = new Pane();
     Minefield field = new Minefield(10, 10, 10);
 
-    showStage(stage, new MinesweeperPane(this, field));
+    for(int i=0; i < 3; i++) {
+      HasParent minesweeper = new MinesweeperPane(this, field);
+      Parent node = minesweeper.asParent();
+      Draggable.makeDraggable(node);
+
+      node.setLayoutX(i * 400);
+
+      group.getChildren().add(node);
+    }
+
+    Button button = new Button("New Minesweeper");
+    HBox box = new HBox();
+    box.setPadding(new Insets(15, 12, 15, 12));
+    box.setStyle("-fx-background-color: #336699;");
+    box.getChildren().add(button);
+    BorderPane pane = new BorderPane();
+    pane.setTop(box);
+    pane.setCenter(group);
+
+//    group.setStyle("-fx-fill: yellow;" +
+//    "-fx-stroke: green;" +
+//    "-fx-stroke-width: 5;" +
+//    "-fx-stroke-dash-array: 12 2 4 2;" +
+//    "-fx-stroke-dash-offset: 6;" +
+//    "-fx-stroke-line-cap: butt;");
+//    group.setAutoSizeChildren(false);
+
+    stage.setTitle("JavaFX Minesweeper");
+    stage.setScene(new Scene(pane, 600, 400));
+    stage.show();
   }
 
   public void createAndShowStage(HasParent root) {
