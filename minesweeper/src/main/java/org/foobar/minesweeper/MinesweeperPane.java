@@ -37,16 +37,20 @@ import org.foobar.minesweeper.model.Squares;
 public final class MinesweeperPane implements HasParent {
   private final Parent root;
   private final Label status;
-
   private final int rows;
   private final int columns;
   private final Minefield field;
   private final FieldCanvas canvas;
   private final Minesweeper appController;
 
-  public MinesweeperPane(Minesweeper appController, Minefield field) {
-    this.appController = appController;
+  public MinesweeperPane(MinesweeperPane pane) {
+    this(pane.field, pane.appController);
+  }
+
+  public MinesweeperPane(Minefield field, final Minesweeper appController) {
     this.field = field;
+    this.appController = appController;
+
     rows = field.getRowCount();
     columns = field.getColumnCount();
 
@@ -71,7 +75,8 @@ public final class MinesweeperPane implements HasParent {
         .style("-fx-border-color: black;"
             + "-fx-border-width: 1;"
             + "-fx-border-radius: 6;"
-            + "-fx-padding: 6;")
+            + "-fx-padding: 6;"
+            + "-fx-background-color: white;")
         .prefHeight(308)
         .prefWidth(268)
         .children(
@@ -83,15 +88,22 @@ public final class MinesweeperPane implements HasParent {
                 ButtonBuilder.create()
                 .text("_New Game")
                 .onAction(new EventHandler<ActionEvent>() {
-                  public void handle(ActionEvent arg0) {
+                  @Override public void handle(ActionEvent event) {
                     onNewGame();
                   }
                 }).build(),
                 ButtonBuilder.create()
-                .text("_Clone")
+                .text("C_lone")
                 .onAction(new EventHandler<ActionEvent>() {
-                  public void handle(ActionEvent arg0) {
-                    onClone();
+                  @Override public void handle(ActionEvent event) {
+                    appController.onClone(MinesweeperPane.this);
+                  }
+                }).build(),
+                ButtonBuilder.create()
+                .text("_Close")
+                .onAction(new EventHandler<ActionEvent>() {
+                  @Override public void handle(ActionEvent event) {
+                    appController.onClose(MinesweeperPane.this);
                   }
                 }).build()
             ).build(),
@@ -101,6 +113,8 @@ public final class MinesweeperPane implements HasParent {
          .layoutX(14)
          .layoutY(290).build()
         ).build();
+
+    Draggable.makeDraggable(root);
 
     field.addFieldHandler(new FieldHandler() {
       @Override public void updateSquare(Square square) {
@@ -117,20 +131,12 @@ public final class MinesweeperPane implements HasParent {
     });
   }
 
-  public MinesweeperPane(MinesweeperPane pane) {
-    this(pane.appController, pane.field);
-  }
-
   public Parent asParent() {
     return root;
   }
 
   private void onNewGame() {
     field.restart();
-  }
-
-  private void onClone() {
-    appController.createAndShowStage(new MinesweeperPane(this));
   }
 
   private void onCanvasClicked(MouseEvent event) {
@@ -197,4 +203,6 @@ public final class MinesweeperPane implements HasParent {
     return field.getSquare(canvas.scaleRow(event.getY()),
         canvas.scaleColumn(event.getX()));
   }
+
+
 }
