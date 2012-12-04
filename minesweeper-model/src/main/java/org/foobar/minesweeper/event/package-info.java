@@ -14,5 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * Defines types for handling {@link Minefield} related events.
+ * 
+ */
 package org.foobar.minesweeper.event;
 
