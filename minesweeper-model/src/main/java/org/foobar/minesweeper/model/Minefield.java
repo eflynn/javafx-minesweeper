@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.foobar.minesweeper.event.FieldHandler;
 import org.foobar.minesweeper.event.HandlerRegistration;
 
 /**
@@ -37,6 +36,28 @@ import org.foobar.minesweeper.event.HandlerRegistration;
  * @author Evan Flynn
  */
 public final class Minefield {
+  /**
+   * Handler for {@code Minefield} events.
+   */
+  public interface FieldHandler {
+    /**
+     * Called when a {@code Square} was changed.
+     *
+     * @param square  square to update.
+     */
+    void updateSquare(Square square);
+
+    /**
+     * Called when the entire board was changed. This occurs on a restart
+     * or a cascade.
+     */
+    void updateBoard();
+
+    /**
+     * Called when the game state was updated.
+     */
+    void changeState(State state);
+  }
 
   /**
    * The current state of the game.

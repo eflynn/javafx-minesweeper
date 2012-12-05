@@ -28,8 +28,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.PaneBuilder;
 
-import org.foobar.minesweeper.event.FieldHandler;
 import org.foobar.minesweeper.model.Minefield;
+import org.foobar.minesweeper.model.Minefield.FieldHandler;
 import org.foobar.minesweeper.model.Minefield.State;
 import org.foobar.minesweeper.model.Square;
 import org.foobar.minesweeper.model.Squares;
