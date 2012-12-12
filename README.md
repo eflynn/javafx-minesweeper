@@ -1,8 +1,8 @@
-# javafx-minesweeper
+# JavaFX Minesweeper
+
+A Minesweeper game written in Java using the JavaFX client platform.
 
 ![javafx-minesweeper screenshot](http://i.imgur.com/9i04k.png)
-
-A Minesweeper game written in Java using the JavaFX client platform. 
 
 # Opening Minesweeper In Eclipse
 
@@ -16,3 +16,7 @@ Using your favorite git client, clone the repository. Windows users can use [Git
 ![Eclipse screenshot](http://i.imgur.com/q9ARD.png)
 3. In the **Root Directory** field, enter the directory where you cloned the repository. 
 4. The project will be listed under **Projects**. Now click **Finish**.
+
+# License
+
+JavaFX Minesweeper is distributed under the Apache License, version 2.0. Please see the COPYING file.
