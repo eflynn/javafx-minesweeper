@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.foobar.minesweeper.event.HandlerRegistration;
-
 /**
  * Provides a model for a Minesweeper game. Objects that wish to be notified
  * with updates from this class can call {@code addFieldHandler}.
