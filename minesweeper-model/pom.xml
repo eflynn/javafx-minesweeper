@@ -11,6 +11,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>minesweeper-model</artifactId>
+  <version>1.0</version>
   <packaging>jar</packaging>
   <name>Minesweeper Model Classes</name>
   <dependencies>
