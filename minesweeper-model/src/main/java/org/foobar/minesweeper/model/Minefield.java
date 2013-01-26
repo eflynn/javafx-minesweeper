@@ -178,7 +178,7 @@ public final class Minefield {
    *           than or equal to {@code getRowCount()}
    * @throws IndexOutOfBoundsException if {@code column} is negative or greater
    *           than or equal to {@code getColumnCount()}
-   * @returns square at {@code row} and {@code column}
+   * @return square at {@code row} and {@code column}
    */
   public Square getSquare(int row, int column) {
     checkElementIndex(row, rows);
