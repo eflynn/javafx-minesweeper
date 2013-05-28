@@ -45,7 +45,10 @@
         </executions>
       </plugin>
       <plugin>
-        <!-- copies resources to correct directory -->
+        <!--
+        This configuration makes sure the image files (resources)
+        end up in a directory named "resources" for the compiled class files.
+        -->
         <artifactId>maven-resources-plugin</artifactId>
         <version>2.6</version>
         <configuration>
