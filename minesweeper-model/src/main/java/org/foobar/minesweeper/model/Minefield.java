@@ -230,8 +230,8 @@ public final class Minefield {
 
   void onGameLost() {
     for (Square[] columns : table) {
-      for (Square i : columns) {
-        i.onGameLost();
+      for (Square square : columns) {
+        square.onGameLost();
       }
     }
 
@@ -261,20 +261,21 @@ public final class Minefield {
     }
   }
 
-  private void cascade(Square square) {
-    int exposed = square.visit();
+  private void cascade(Square start) {
+    int exposed = start.visit();
 
     unrevealed -= exposed;
 
     if (unrevealed == 0) {
-      for(Square s : mineSet)
-        s.onGameWon();
+      for(Square square : mineSet) {
+        square.onGameWon();
+      }
 
       setState(State.WON);
       updateBoard();
     }
     else if (exposed == 1) {
-      updateSquare(square);
+      updateSquare(start);
     }
     else {
       updateBoard();
@@ -298,15 +299,15 @@ public final class Minefield {
 
     mineSet.addAll(flat.subList(0, mines));
 
-    for(Square s : mineSet) {
-      s.setMine(findNeighbors(s));
+    for(Square square : mineSet) {
+      square.setMine(findNeighbors(square));
     }
   }
 
   private void setState(State aState) {
     if (aState != gameState) {
       gameState = aState;
-      gameOver = aState == State.LOST || aState == State.WON;
+      gameOver = (aState == State.LOST || aState == State.WON);
 
       for (FieldHandler handler : handlers) {
         handler.changeState(gameState);
