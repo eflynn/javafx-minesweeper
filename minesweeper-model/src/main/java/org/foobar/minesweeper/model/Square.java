@@ -88,15 +88,17 @@ public class Square {
    *
    */
   public void toggleFlag() {
-    if (minefield.isGameOver())
+    if (minefield.isGameOver()) {
       return;
+    }
 
-    if (type == Squares.FLAG)
+    if (type == Squares.FLAG) {
       type = Squares.BLANK;
-    else if (type == Squares.BLANK)
+    } else if (type == Squares.BLANK) {
       type = Squares.FLAG;
-    else
+    } else {
       return;
+    }
 
     minefield.updateSquare(this);
   }
@@ -110,15 +112,15 @@ public class Square {
    * restarted.
    */
   public void reveal() {
-    if (type != Squares.BLANK || minefield.isGameOver())
+    if (type != Squares.BLANK || minefield.isGameOver()) {
       return;
+    }
 
     if (mine) {
       type = Squares.HITMINE;
       mine = false;
       minefield.onGameLost();
-    }
-    else {
+    } else {
       minefield.reveal(this);
     }
   }
@@ -128,8 +130,9 @@ public class Square {
    * work. Otherwise, the method returns with no change.
    */
   public void revealNearby() {
-    if (minefield.isGameOver() || type != Squares.EXPOSED)
+    if (minefield.isGameOver() || type != Squares.EXPOSED) {
       return;
+    }
 
     List<Square> neighbors = minefield.findNeighbors(this);
     int nearbyFlags = 0;
@@ -156,15 +159,17 @@ public class Square {
   }
 
   void onGameLost() {
-    if (mine)
+    if (mine) {
       type = Squares.MINE;
-    else if (type == Squares.FLAG)
+    } else if (type == Squares.FLAG) {
       type = Squares.WRONGMINE;
+    }
   }
 
   void onGameWon() {
-    if (mine)
+    if (mine) {
       type = Squares.FLAG;
+    }
   }
 
   int visit() {
