@@ -79,7 +79,6 @@ public final class Minefield {
   private final int mines;
   private int unrevealed;
   private State gameState;
-  private boolean gameOver;
   private final Square[][] table;
   private final List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
   private final List<Square> mineSet = new ArrayList<>();
@@ -193,7 +192,7 @@ public final class Minefield {
    * @return whether the game is over
    */
   public boolean isGameOver() {
-    return gameOver;
+    return (gameState == State.LOST || gameState == State.WON);
   }
 
   /**
@@ -220,7 +219,7 @@ public final class Minefield {
   }
 
   void reveal(Square square) {
-    assert !gameOver && square.getType() == Squares.BLANK;
+    assert !isGameOver() && square.getType() == Squares.BLANK;
 
     if (gameState == State.START)
       firstClick(square);
@@ -307,7 +306,6 @@ public final class Minefield {
   private void setState(State aState) {
     if (aState != gameState) {
       gameState = aState;
-      gameOver = (aState == State.LOST || aState == State.WON);
 
       for (FieldHandler handler : handlers) {
         handler.changeState(gameState);
