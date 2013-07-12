@@ -282,7 +282,7 @@ public final class Minefield {
   }
 
   private void firstClick(Square first) {
-    gameState = State.PLAYING;
+    setState(State.PLAYING);
 
     List<Square> flat = new ArrayList<>(rows * columns);
 
