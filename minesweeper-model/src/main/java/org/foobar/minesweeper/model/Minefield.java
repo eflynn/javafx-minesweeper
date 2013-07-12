@@ -34,46 +34,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Evan Flynn
  */
 public final class Minefield {
-  /**
-   * Handler for {@code Minefield} events.
-   */
-  public interface FieldHandler {
-    /**
-     * Called when a {@code Square} was changed.
-     *
-     * @param square  square to update.
-     */
-    void updateSquare(Square square);
-
-    /**
-     * Called when the entire board was changed. This occurs on a restart
-     * or a cascade.
-     */
-    void updateBoard();
-
-    /**
-     * Called when the game state was updated.
-     */
-    void changeState(State state);
-  }
-
-  /**
-   * The current state of the game.
-   *
-   * The initial state is {@code START}. It changes to {@code PLAYING} when the
-   * first square has been revealed.
-   */
-  public enum State {
-    /** Indicates that a mine was tripped and the game is over. */
-    LOST,
-    /** The game is in progress. */
-    PLAYING,
-    /** The game was reset. */
-    START,
-    /** The game has been won. */
-    WON;
-  }
-
   private final int columns;
   private final int rows;
   private final int mines;
@@ -315,5 +275,45 @@ public final class Minefield {
         handler.changeState(gameState);
       }
     }
+  }
+
+  /**
+   * Handler for {@code Minefield} events.
+   */
+  public interface FieldHandler {
+    /**
+     * Called when a {@code Square} was changed.
+     *
+     * @param square  square to update.
+     */
+    void updateSquare(Square square);
+
+    /**
+     * Called when the entire board was changed. This occurs on a restart
+     * or a cascade.
+     */
+    void updateBoard();
+
+    /**
+     * Called when the game state was updated.
+     */
+    void changeState(State state);
+  }
+
+  /**
+   * The current state of the game.
+   *
+   * The initial state is {@code START}. It changes to {@code PLAYING} when the
+   * first square has been revealed.
+   */
+  public enum State {
+    /** Indicates that a mine was tripped and the game is over. */
+    LOST,
+    /** The game is in progress. */
+    PLAYING,
+    /** The game was reset. */
+    START,
+    /** The game has been won. */
+    WON;
   }
 }
