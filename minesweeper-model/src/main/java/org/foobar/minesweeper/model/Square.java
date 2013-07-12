@@ -32,6 +32,10 @@ public class Square {
     this.column = column;
   }
 
+  public void addNearbyMine() {
+    nearbyMines++;
+  }
+
   /**
    * Gets the type of the Square.
    *
@@ -147,12 +151,8 @@ public class Square {
     return mine;
   }
 
-  void setMine(List<Square> neighbors) {
-    mine = true;
-
-    for(Square square : neighbors) {
-      square.nearbyMines++;
-    }
+  void setMine(boolean isMine) {
+    mine = isMine;
   }
 
   void onGameLost() {

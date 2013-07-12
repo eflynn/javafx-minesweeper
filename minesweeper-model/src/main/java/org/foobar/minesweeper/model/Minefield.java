@@ -299,7 +299,11 @@ public final class Minefield {
     mineSet.addAll(flat.subList(0, mines));
 
     for(Square square : mineSet) {
-      square.setMine(findNeighbors(square));
+      square.setMine(true);
+
+      for (Square neighbor : findNeighbors(square)) {
+        neighbor.addNearbyMine();
+      }
     }
   }
 
