@@ -267,9 +267,9 @@ public final class Minefield {
     }
   }
 
-  private void setState(State aState) {
-    if (aState != state) {
-      state = aState;
+  private void setState(State state) {
+    if (this.state != state) {
+      this.state = state;
 
       for (FieldHandler handler : handlers) {
         handler.changeState(state);
