@@ -246,8 +246,8 @@ public final class Minefield {
 
     List<Square> flat = new ArrayList<>(rows * columns);
 
-    for(int i=0; i<rows; i++) {
-      for(int j=0; j<columns; j++) {
+    for(int i = 0; i < rows; i++) {
+      for(int j = 0; j < columns; j++) {
         if (table[i][j] != first) {
           flat.add(table[i][j]);
         }
