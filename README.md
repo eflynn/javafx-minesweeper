@@ -19,4 +19,4 @@ Using your favorite git client, clone the repository. Windows users can use [Git
 
 # License
 
-JavaFX Minesweeper is distributed under the Apache License, version 2.0. Please see the COPYING file.
+JavaFX Minesweeper is distributed under the Apache License, version 2.0. Please see the LICENSE file.
