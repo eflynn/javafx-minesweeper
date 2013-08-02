@@ -13,13 +13,6 @@
   <description>write me</description>
   <dependencies>
     <dependency>
-      <groupId>com.oracle</groupId>
-      <artifactId>javafx</artifactId>
-      <version>2.2</version>
-      <systemPath>${java.home}/lib/jfxrt.jar</systemPath>
-      <scope>system</scope>
-    </dependency>
-    <dependency>
       <groupId>org.foobar.minesweeper</groupId>
       <artifactId>minesweeper-model</artifactId>
       <version>1.0</version>
