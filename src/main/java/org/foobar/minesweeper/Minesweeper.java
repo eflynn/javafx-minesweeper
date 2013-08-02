@@ -85,7 +85,7 @@ public class Minesweeper extends Application {
 
     Minefield minefield = new Minefield(10, 10, 10);
 
-    final MinesweeperPane minesweeper = new MinesweeperPane(minefield, this);
+    MinesweeperPane minesweeper = new MinesweeperPane(minefield, this);
     minesweeper.asParent().relocate(x, y);
     minesweeper.asParent().requestFocus();
 
