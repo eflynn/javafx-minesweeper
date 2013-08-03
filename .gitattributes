@@ -1,5 +1,9 @@
 * text=auto
 
+# Ignore some files when archiving
+.gitignore      export-ignore
+.gitattributes  export-ignore
+
 # Source files
 *.java text
 
