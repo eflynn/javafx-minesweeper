@@ -315,10 +315,6 @@ public final class Minefield {
       this.column = column;
     }
 
-    public void addNearbyMine() {
-      nearbyMines++;
-    }
-
     /**
      * Gets the type of the Square.
      *
@@ -443,6 +439,10 @@ public final class Minefield {
           square.reveal();
         }
       }
+    }
+
+    void addNearbyMine() {
+      nearbyMines++;
     }
 
     boolean isMine() {
