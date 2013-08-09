@@ -188,17 +188,6 @@ public final class Minefield {
     cascade(square);
   }
 
-  void onGameLost() {
-    for (Square[] columns : table) {
-      for (Square square : columns) {
-        square.onGameLost();
-      }
-    }
-
-    updateBoard();
-    setState(State.LOST);
-  }
-
   List<Square> findNeighbors(Square square) {
     List<Square> neighbors = new ArrayList<>(8);
     int row = square.getRow();
@@ -227,13 +216,7 @@ public final class Minefield {
     unrevealed -= exposed;
 
     if (unrevealed == 0) {
-      for(Square square : mineSet) {
-        square.onGameWon();
-      }
-
       setState(State.WON);
-      updateBoard();
-
     } else if (exposed == 1) {
       updateSquare(start);
     } else {
@@ -269,7 +252,9 @@ public final class Minefield {
 
   private void setState(State state) {
     if (this.state != state) {
+      // TODO: check if board update always applies.
       this.state = state;
+      updateBoard();
 
       for (FieldHandler handler : handlers) {
         handler.changeState(state);
@@ -323,6 +308,7 @@ public final class Minefield {
     private boolean mine;
     private Squares type = Squares.BLANK;
     private int nearbyMines;
+    private boolean cached;
 
     Square(int row, int column) {
       this.row = row;
@@ -339,6 +325,18 @@ public final class Minefield {
      * @return type of the Square
      */
     public Squares getType() {
+      if (!cached && isGameOver()) {
+        if (mine && getState() == State.LOST) {
+          type = Squares.MINE;
+        } else if (type == Squares.FLAG && getState() == State.LOST) {
+          type = Squares.WRONGMINE;
+        } else if (getState() == State.WON && mine) {
+          type = Squares.FLAG;
+        }
+
+        cached = true;
+      }
+
       return type;
     }
 
@@ -414,9 +412,9 @@ public final class Minefield {
       }
 
       if (mine) {
-        type = Squares.HITMINE;
         mine = false;
-        Minefield.this.onGameLost();
+        type = Squares.HITMINE;
+        setState(State.LOST);
       } else {
         Minefield.this.reveal(this);
       }
@@ -453,20 +451,6 @@ public final class Minefield {
 
     void setMine(boolean isMine) {
       mine = isMine;
-    }
-
-    void onGameLost() {
-      if (mine) {
-        type = Squares.MINE;
-      } else if (type == Squares.FLAG) {
-        type = Squares.WRONGMINE;
-      }
-    }
-
-    void onGameWon() {
-      if (mine) {
-        type = Squares.FLAG;
-      }
     }
 
     int visit() {
