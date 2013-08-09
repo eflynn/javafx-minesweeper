@@ -181,8 +181,9 @@ public final class Minefield {
   void reveal(Square square) {
     assert !isGameOver() && square.getType() == Squares.BLANK;
 
-    if (state == State.START)
+    if (state == State.START) {
       firstClick(square);
+    }
 
     cascade(square);
   }
@@ -232,11 +233,10 @@ public final class Minefield {
 
       setState(State.WON);
       updateBoard();
-    }
-    else if (exposed == 1) {
+
+    } else if (exposed == 1) {
       updateSquare(start);
-    }
-    else {
+    } else {
       updateBoard();
     }
   }
