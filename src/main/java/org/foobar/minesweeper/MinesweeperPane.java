@@ -31,7 +31,7 @@ import javafx.scene.layout.PaneBuilder;
 import org.foobar.minesweeper.model.Minefield;
 import org.foobar.minesweeper.model.Minefield.FieldHandler;
 import org.foobar.minesweeper.model.Minefield.State;
-import org.foobar.minesweeper.model.Square;
+import org.foobar.minesweeper.model.Minefield.Square;
 import org.foobar.minesweeper.model.Squares;
 
 public final class MinesweeperPane implements HasParent {
