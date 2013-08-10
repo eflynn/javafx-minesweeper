@@ -42,6 +42,7 @@ public final class Minefield {
   private final Square[][] table;
   private final List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
   private final List<Square> mineSet = new ArrayList<>();
+  private final Set<Square> flagSet = new HashSet<>();
   private final Random random;
 
   /**
@@ -160,6 +161,7 @@ public final class Minefield {
    */
   public void reset() {
     mineSet.clear();
+    flagSet.clear();
     unrevealed = (rows * columns) - mines;
 
     for (int r = 0; r < rows; r++) {
@@ -317,13 +319,19 @@ public final class Minefield {
         return;
       }
 
+      boolean changed;
+
       if (type == Squares.FLAG) {
+        changed = flagSet.remove(this);
         type = Squares.BLANK;
       } else if (type == Squares.BLANK) {
+        changed = flagSet.add(this);
         type = Squares.FLAG;
       } else {
         return;
       }
+
+      assert changed;
 
       updateSquare(this);
     }
