@@ -344,18 +344,14 @@ public final class Minefield {
         mine = false;
         type = Squares.HITMINE;
 
-        for (Square[] row : table) {
-          for (Square )         
-        }
-
-        for(int i=0; i < rows; i++) {
-          for(int j=0; j < columns; j++) {
-            if (table[i][j].type == Squares.FLAG) {
-              type = Squares.WRONGMINE;
+        for (Square[] rows : table) {
+          for (Square square : row) {
+            if (square.type == Squares.FLAG) {
+              square.type = Squares.WRONGMINE;
             }
           }
         }
-        
+
         setState(State.LOST);
       } else {
         if (state == State.START) {
