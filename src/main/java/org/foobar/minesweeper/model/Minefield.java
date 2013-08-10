@@ -244,7 +244,6 @@ public final class Minefield {
     private boolean mine;
     private Squares type = Squares.BLANK;
     private int nearbyMines;
-    private boolean cached;
 
     Square(int row, int column) {
       this.row = row;
@@ -257,18 +256,6 @@ public final class Minefield {
      * @return type of the Square
      */
     public Squares getType() {
-      if (!cached && isGameOver()) {
-        if (mine && state == State.LOST) {
-          type = Squares.MINE;
-        } else if (type == Squares.FLAG && state == State.LOST) {
-          type = Squares.WRONGMINE;
-        } else if (state == State.WON && mine) {
-          type = Squares.FLAG;
-        }
-
-        cached = true;
-      }
-
       return type;
     }
 
@@ -350,8 +337,25 @@ public final class Minefield {
       }
 
       if (mine) {
+        for(Square square : mineSet) {
+          square.type = Squares.MINE;
+        }
+
         mine = false;
         type = Squares.HITMINE;
+
+        for (Square[] row : table) {
+          for (Square )         
+        }
+
+        for(int i=0; i < rows; i++) {
+          for(int j=0; j < columns; j++) {
+            if (table[i][j].type == Squares.FLAG) {
+              type = Squares.WRONGMINE;
+            }
+          }
+        }
+        
         setState(State.LOST);
       } else {
         if (state == State.START) {
@@ -393,6 +397,10 @@ public final class Minefield {
       unrevealed -= exposed;
 
       if (unrevealed == 0) {
+        for(Square square : mineSet) {
+          square.type = Squares.FLAG;
+        }
+        
         setState(State.WON);
       } else if (exposed == 1) {
         updateSquare(this);
