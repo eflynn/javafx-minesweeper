@@ -71,7 +71,7 @@ public final class Minefield {
 
     table = new Square[rows][columns];
 
-    restart();
+    reset();
   }
 
   /**
@@ -156,9 +156,9 @@ public final class Minefield {
   }
 
   /**
-   * Restarts the Minesweeper game.
+   * Resets the Minesweeper game.
    */
-  public void restart() {
+  public void reset() {
     mineSet.clear();
     unrevealed = (rows * columns) - mines;
 
@@ -289,7 +289,7 @@ public final class Minefield {
     void updateSquare(Square square);
 
     /**
-     * Called when the entire board was changed. This occurs on a restart
+     * Called when the entire board was changed. This occurs on a reset
      * or a cascade.
      */
     void updateBoard();

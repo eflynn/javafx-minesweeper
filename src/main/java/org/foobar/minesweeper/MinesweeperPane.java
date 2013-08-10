@@ -136,7 +136,7 @@ public final class MinesweeperPane implements HasParent {
   }
 
   private void onNewGame() {
-    field.restart();
+    field.reset();
   }
 
   private void onCanvasClicked(MouseEvent event) {
