@@ -406,8 +406,6 @@ public final class Minefield {
     }
 
     private void firstClick() {
-      setState(State.PLAYING);
-
       List<Square> flat = new ArrayList<>(rows * columns);
 
       for(int i = 0; i < rows; i++) {
@@ -430,6 +428,8 @@ public final class Minefield {
       }
 
       mineSet.addAll(flat.subList(0, mines));
+
+      setState(State.PLAYING);
     }
 
     private List<Square> findNeighbors() {
