@@ -461,5 +461,4 @@ public final class Minefield {
       return exposed;
     }
   }
-
 }
