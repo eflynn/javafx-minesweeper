@@ -178,75 +178,9 @@ public final class Minefield {
     }
   }
 
-  void reveal(Square square) {
-    assert !isGameOver() && square.getType() == Squares.BLANK;
-
-    if (state == State.START) {
-      firstClick(square);
-    }
-
-    cascade(square);
-  }
-
-  List<Square> findNeighbors(Square square) {
-    List<Square> neighbors = new ArrayList<>(8);
-    int row = square.getRow();
-    int column = square.getColumn();
-
-    for (int r = row - 1; r <= row + 1; r++) {
-      for (int c = column - 1; c <= column + 1; c++) {
-        if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows
-            && c < columns)
-          neighbors.add(table[r][c]);
-      }
-    }
-
-    return neighbors;
-  }
-
   void updateBoard() {
     for (FieldHandler handler : handlers) {
       handler.updateBoard();
-    }
-  }
-
-  private void cascade(Square start) {
-    int exposed = start.visit();
-
-    unrevealed -= exposed;
-
-    if (unrevealed == 0) {
-      setState(State.WON);
-    } else if (exposed == 1) {
-      updateSquare(start);
-    } else {
-      updateBoard();
-    }
-  }
-
-  private void firstClick(Square first) {
-    setState(State.PLAYING);
-
-    List<Square> flat = new ArrayList<>(rows * columns);
-
-    for(int i = 0; i < rows; i++) {
-      for(int j = 0; j < columns; j++) {
-        if (table[i][j] != first) {
-          flat.add(table[i][j]);
-        }
-      }
-    }
-
-    Collections.shuffle(flat, random);
-
-    mineSet.addAll(flat.subList(0, mines));
-
-    for(Square square : mineSet) {
-      square.setMine(true);
-
-      for (Square neighbor : findNeighbors(square)) {
-        neighbor.addNearbyMine();
-      }
     }
   }
 
@@ -322,11 +256,11 @@ public final class Minefield {
      */
     public Squares getType() {
       if (!cached && isGameOver()) {
-        if (mine && getState() == State.LOST) {
+        if (mine && state == State.LOST) {
           type = Squares.MINE;
-        } else if (type == Squares.FLAG && getState() == State.LOST) {
+        } else if (type == Squares.FLAG && state == State.LOST) {
           type = Squares.WRONGMINE;
-        } else if (getState() == State.WON && mine) {
+        } else if (state == State.WON && mine) {
           type = Squares.FLAG;
         }
 
@@ -412,7 +346,11 @@ public final class Minefield {
         type = Squares.HITMINE;
         setState(State.LOST);
       } else {
-        Minefield.this.reveal(this);
+        if (state == State.START) {
+          firstClick();
+        }
+
+        cascade();
       }
     }
 
@@ -425,7 +363,7 @@ public final class Minefield {
         return;
       }
 
-      List<Square> neighbors = findNeighbors(this);
+      List<Square> neighbors = findNeighbors();
       int nearbyFlags = 0;
 
       for (Square square : neighbors) {
@@ -441,16 +379,59 @@ public final class Minefield {
       }
     }
 
-    void addNearbyMine() {
-      nearbyMines++;
+    private void cascade() {
+      int exposed = visit();
+
+      unrevealed -= exposed;
+
+      if (unrevealed == 0) {
+        setState(State.WON);
+      } else if (exposed == 1) {
+        updateSquare(this);
+      } else {
+        updateBoard();
+      }
     }
 
-    boolean isMine() {
-      return mine;
+    private void firstClick() {
+      setState(State.PLAYING);
+
+      List<Square> flat = new ArrayList<>(rows * columns);
+
+      for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < columns; j++) {
+          if (i != row && j != column) {
+            flat.add(table[i][j]);
+          }
+        }
+      }
+
+      Collections.shuffle(flat, random);
+      List<Square> mines = flat.subList(0, mines);
+
+      for(Square square : mines) {
+        square.mine = true;
+
+        for (Square neighbor : findNeighbors()) {
+          neighbor.nearbyMines++;
+        }
+      }
+
+      mineSet.addAll(flat.subList(0, mines));
     }
 
-    void setMine(boolean isMine) {
-      mine = isMine;
+    private List<Square> findNeighbors() {
+      List<Square> neighbors = new ArrayList<>(8);
+
+      for (int r = row - 1; r <= row + 1; r++) {
+        for (int c = column - 1; c <= column + 1; c++) {
+          if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows
+              && c < columns)
+            neighbors.add(table[r][c]);
+        }
+      }
+
+      return neighbors;
     }
 
     int visit() {
@@ -458,7 +439,7 @@ public final class Minefield {
       type = Squares.EXPOSED;
 
       if (nearbyMines == 0) {
-        for (Square square : findNeighbors(this)) {
+        for (Square square : findNeighbors()) {
           if (square.type != Squares.EXPOSED) {
             exposed += square.visit();
           }
