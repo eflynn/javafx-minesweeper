@@ -32,10 +32,6 @@ public class Square {
     this.column = column;
   }
 
-  public void addNearbyMine() {
-    nearbyMines++;
-  }
-
   /**
    * Gets the type of the Square.
    *
@@ -148,6 +144,10 @@ public class Square {
         square.reveal();
       }
     }
+  }
+
+  void addNearbyMine() {
+    nearbyMines++;
   }
 
   boolean isMine() {
