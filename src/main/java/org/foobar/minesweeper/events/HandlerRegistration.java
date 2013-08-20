@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.foobar.minesweeper.model;
+package org.foobar.minesweeper.events;
 
 /**
  * Use the handler registration to remove handlers when they are no longer needed.
