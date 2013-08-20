@@ -77,7 +77,7 @@ public final class Minefield {
   /**
    * Adds a handler for Minefield events.
    *
-   * @param handler the click handler
+   * @param handler the field handler
    * @return {@code HandlerRegistration} used to remove this handler
    */
   public HandlerRegistration addFieldHandler(final FieldHandler handler) {
