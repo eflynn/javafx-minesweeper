@@ -9,19 +9,12 @@ import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
 public class ModelTest {
-  @SuppressWarnings("serial")
-  private final Random random = new Random() {
-    @Override protected int next(int bits) {
-      return 1;
-    }
-  };
-
   private Minefield field;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    field = new Minefield(10, 10, 10, random);
+    field = new Minefield(10, 10, 10);
   }
 
   @Test(expected=IllegalArgumentException.class)
@@ -39,8 +32,9 @@ public class ModelTest {
 
     for(int i=0; i<field.getRowCount(); i++) {
       for(int j=0; j<field.getColumnCount(); j++) {
-        if (field.getSquare(i, j).isMine())
+        if (field.getSquare(i, j).isMine()) {
           mines++;
+        }
       }
     }
 

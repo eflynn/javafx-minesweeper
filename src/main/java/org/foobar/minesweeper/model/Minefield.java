@@ -22,7 +22,6 @@ import static com.google.common.base.Preconditions.checkElementIndex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.foobar.minesweeper.events.HandlerRegistration;
@@ -45,7 +44,6 @@ public final class Minefield {
   private final Square[][] table;
   private final List<ChangeHandler> handlers = new CopyOnWriteArrayList<>();
   private final List<Square> mineSet = new ArrayList<>();
-  private final Random random;
 
   /**
    * Creates a {@code Minefield}.
@@ -57,10 +55,6 @@ public final class Minefield {
    *           {@code mines} is negative.
    */
   public Minefield(int rows, int columns, int mines) {
-    this(rows, columns, mines, new Random());
-  }
-
-  Minefield(int rows, int columns, int mines, Random random) {
     // FIXME: only does basic checks for sanity.
 
     checkArgument(rows > 0, "rows must be positive: %s", rows);
@@ -70,7 +64,6 @@ public final class Minefield {
     this.rows = rows;
     this.columns = columns;
     this.mines = mines;
-    this.random = random;
 
     table = new Square[rows][columns];
 
@@ -251,7 +244,7 @@ public final class Minefield {
       }
     }
 
-    Collections.shuffle(flat, random);
+    Collections.shuffle(flat);
 
     mineSet.addAll(flat.subList(0, mines));
 
