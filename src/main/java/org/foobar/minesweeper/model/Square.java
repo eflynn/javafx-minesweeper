@@ -96,7 +96,7 @@ public class Square {
       return;
     }
 
-    minefield.updateSquare(this);
+    minefield.update();
   }
 
   /**

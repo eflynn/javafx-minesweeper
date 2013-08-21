@@ -26,10 +26,11 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.foobar.minesweeper.events.HandlerRegistration;
+import org.foobar.minesweeper.events.ChangeHandler;
 
 /**
  * Provides a model for a Minesweeper game. Objects that wish to be notified
- * with updates from this class can call {@code addFieldHandler}.
+ * with updates from this class can call {@code addChangeHandler}.
  *
  * This class is not thread-safe.
  *
@@ -42,7 +43,7 @@ public final class Minefield {
   private int unrevealed;
   private State state;
   private final Square[][] table;
-  private final List<FieldHandler> handlers = new CopyOnWriteArrayList<>();
+  private final List<ChangeHandler> handlers = new CopyOnWriteArrayList<>();
   private final List<Square> mineSet = new ArrayList<>();
   private final Random random;
 
@@ -79,13 +80,13 @@ public final class Minefield {
   /**
    * Adds a handler for Minefield events.
    *
-   * @param handler the field handler
+   * @param handler the change handler
    * @return {@code HandlerRegistration} used to remove this handler
    */
-  public HandlerRegistration addFieldHandler(final FieldHandler handler) {
+  public HandlerRegistration addChangeHandler(final ChangeHandler handler) {
     handlers.add(handler);
 
-    updateBoard();
+    update();
 
     return new HandlerRegistration() {
       @Override public void removeHandler() {
@@ -170,14 +171,8 @@ public final class Minefield {
       }
     }
 
-    updateBoard();
+    update();
     setState(State.START);
-  }
-
-  void updateSquare(Square square) {
-    for (FieldHandler handler : handlers) {
-      handler.updateSquare(square);
-    }
   }
 
   void reveal(Square square) {
@@ -197,7 +192,7 @@ public final class Minefield {
       }
     }
 
-    updateBoard();
+    update();
     setState(State.LOST);
   }
 
@@ -217,9 +212,9 @@ public final class Minefield {
     return neighbors;
   }
 
-  void updateBoard() {
-    for (FieldHandler handler : handlers) {
-      handler.updateBoard();
+  void update() {
+    for (ChangeHandler handler : handlers) {
+      handler.onUpdate();
     }
   }
 
@@ -234,12 +229,12 @@ public final class Minefield {
       }
 
       setState(State.WON);
-      updateBoard();
+      update();
 
     } else if (exposed == 1) {
-      updateSquare(start);
+      update();
     } else {
-      updateBoard();
+      update();
     }
   }
 
@@ -273,33 +268,8 @@ public final class Minefield {
     if (this.state != state) {
       this.state = state;
 
-      for (FieldHandler handler : handlers) {
-        handler.changeState(state);
-      }
+      update();
     }
-  }
-
-  /**
-   * Handler for {@code Minefield} events.
-   */
-  public interface FieldHandler {
-    /**
-     * Called when a {@code Square} was changed.
-     *
-     * @param square  square to update.
-     */
-    void updateSquare(Square square);
-
-    /**
-     * Called when the entire board was changed. This occurs on a reset
-     * or a cascade.
-     */
-    void updateBoard();
-
-    /**
-     * Called when the game state was updated.
-     */
-    void changeState(State state);
   }
 
   /**

@@ -29,7 +29,7 @@ import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.PaneBuilder;
 
 import org.foobar.minesweeper.model.Minefield;
-import org.foobar.minesweeper.model.Minefield.FieldHandler;
+import org.foobar.minesweeper.events.ChangeHandler;
 import org.foobar.minesweeper.model.Minefield.State;
 import org.foobar.minesweeper.model.Square;
 import org.foobar.minesweeper.model.Squares;
@@ -47,7 +47,7 @@ public final class MinesweeperPane implements HasParent {
     this(pane.field, pane.appController);
   }
 
-  public MinesweeperPane(Minefield field, final Minesweeper appController) {
+  public MinesweeperPane(final Minefield field, final Minesweeper appController) {
     this.field = field;
     this.appController = appController;
 
@@ -116,17 +116,10 @@ public final class MinesweeperPane implements HasParent {
 
     Draggable.makeDraggable(root);
 
-    field.addFieldHandler(new FieldHandler() {
-      @Override public void updateSquare(Square square) {
-        drawSquare(square);
-      }
-
-      @Override public void updateBoard() {
+    field.addChangeHandler(new ChangeHandler() {
+      @Override public void onUpdate() {
         drawBoard();
-      }
-
-      @Override public void changeState(State state) {
-        updateText(state);
+        updateText(field.getState());
       }
     });
   }
