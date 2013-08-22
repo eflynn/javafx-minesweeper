@@ -148,7 +148,7 @@ public final class Minefield {
    * @return whether the game is over
    */
   public boolean isGameOver() {
-    return (state == State.LOST || state == State.WON);
+    return state.isGameOver();
   }
 
   /**
@@ -272,13 +272,23 @@ public final class Minefield {
    * first square has been revealed.
    */
   public enum State {
-    /** Indicates that a mine was tripped and the game is over. */
-    LOST,
     /** The game is in progress. */
-    PLAYING,
+    PLAYING(false),
     /** The game was reset. */
-    START,
+    START(false),
     /** The game has been won. */
-    WON;
+    WON(true),
+    /** Indicates that a mine was tripped and the game is over. */
+    LOST(true);
+
+    private final boolean gameOver;
+
+    State(boolean gameOver) {
+      this.gameOver = gameOver;
+    }
+
+    public boolean isGameOver() {
+      return gameOver;
+    }
   }
 }
