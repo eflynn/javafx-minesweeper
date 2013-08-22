@@ -88,6 +88,14 @@ public final class Minefield {
     };
   }
 
+  public Cursor cursor() {
+    return new Cursor(0, 0);
+  }
+
+  public Cursor cursor(int row, int column) {
+    return new Cursor(row, column);
+  }
+
   /**
    * Gets the number of columns in the minefield.
    *
@@ -125,24 +133,6 @@ public final class Minefield {
   }
 
   /**
-   * Gets the square at {@code row} and {@code column}.
-   *
-   * @param row row to find {@code Square} with
-   * @param column column to find {@code Square} with
-   * @throws IndexOutOfBoundsException if {@code row} is negative or greater
-   *           than or equal to {@code getRowCount()}
-   * @throws IndexOutOfBoundsException if {@code column} is negative or greater
-   *           than or equal to {@code getColumnCount()}
-   * @return square at {@code row} and {@code column}
-   */
-  public Square getSquare(int row, int column) {
-    checkElementIndex(row, rows);
-    checkElementIndex(column, columns);
-
-    return table[row][column];
-  }
-
-  /**
    * Is the game over?
    *
    * @return whether the game is over
@@ -160,7 +150,7 @@ public final class Minefield {
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < columns; c++) {
-        table[r][c] = new Square(this, r, c);
+        table[r][c] = new Square(r, c);
       }
     }
 
@@ -168,20 +158,47 @@ public final class Minefield {
     setState(State.START);
   }
 
-  void reveal(Square square) {
-    assert !isGameOver() && square.getType() == Squares.BLANK;
-
-    if (state == State.START) {
-      firstClick(square);
+  private void reveal(Square square) {
+    if (isGameOver() || !square.isBlank()) {
+      return;
     }
 
-    cascade(square);
+    if (square.tripMine()) {
+      onGameLost();
+    } else {
+      if (state == State.START) {
+        firstClick(square);
+      }
+
+      cascade(square);
+    }
   }
 
-  void onGameLost() {
+  private void revealNearby(Square source) {
+    if (isGameOver() || source.isExposed()) {
+      return;
+    }
+
+    List<Square> neighbors = findNeighbors(source);
+    int nearbyFlags = 0;
+
+    for (Square square : neighbors) {
+      if (square.isFlagged()) {
+        nearbyFlags++;
+      }
+    }
+
+    if (nearbyFlags == source.nearbyMines) {
+      for (Square square : neighbors) {
+        reveal(square);
+      }
+    }
+  }
+
+  private void onGameLost() {
     for (Square[] columns : table) {
       for (Square square : columns) {
-        square.onGameLost();
+        square.revealOnLose();
       }
     }
 
@@ -189,14 +206,16 @@ public final class Minefield {
     setState(State.LOST);
   }
 
-  List<Square> findNeighbors(Square square) {
-    List<Square> neighbors = new ArrayList<>(8);
-    int row = square.getRow();
-    int column = square.getColumn();
+  private boolean withinBounds(int row, int column) {
+    return (row >= 0 && column >= 0) && (row < rows && column < columns);
+  }
 
-    for (int r = row - 1; r <= row + 1; r++) {
-      for (int c = column - 1; c <= column + 1; c++) {
-        if ((r != row || c != column) && r >= 0 && c >= 0 && r < rows && c < columns) {
+  private List<Square> findNeighbors(Square square) {
+    List<Square> neighbors = new ArrayList<>(8);
+
+    for (int r = square.row - 1; r <= square.row + 1; r++) {
+      for (int c = square.column - 1; c <= square.column + 1; c++) {
+        if ((r != square.row || c != square.column) && withinBounds(r, c)) {
           neighbors.add(table[r][c]);
         }
       }
@@ -205,20 +224,21 @@ public final class Minefield {
     return neighbors;
   }
 
-  void update() {
+  private void update() {
     for (ChangeHandler handler : handlers) {
       handler.onUpdate();
     }
   }
 
   private void cascade(Square start) {
-    int exposed = start.visit();
+    int exposed = visit(start);
 
     unrevealed -= exposed;
 
     if (unrevealed == 0) {
+      // Game is won
       for(Square square : mineSet) {
-        square.onGameWon();
+        square.type = Squares.FLAG;
       }
 
       setState(State.WON);
@@ -231,6 +251,22 @@ public final class Minefield {
     }
   }
 
+  private int visit(Square source) {
+    int exposed = 1;
+    source.expose();
+
+    if (source.nearbyMines == 0) {
+      for (Square square : findNeighbors(source)) {
+        if (!square.isExposed()) {
+          exposed += visit(square);
+        }
+      }
+    }
+
+    return exposed;
+  }
+
+
   private void firstClick(Square first) {
     setState(State.PLAYING);
 
@@ -238,7 +274,7 @@ public final class Minefield {
 
     for(int i = 0; i < rows; i++) {
       for(int j = 0; j < columns; j++) {
-        if (table[i][j] != first) {
+        if (i != first.row || j != first.column) {
           flat.add(table[i][j]);
         }
       }
@@ -249,10 +285,10 @@ public final class Minefield {
     mineSet.addAll(flat.subList(0, mines));
 
     for(Square square : mineSet) {
-      square.setMine(true);
+      square.mine = true;
 
       for (Square neighbor : findNeighbors(square)) {
-        neighbor.addNearbyMine();
+        neighbor.nearbyMines++;
       }
     }
   }
@@ -262,6 +298,118 @@ public final class Minefield {
       this.state = state;
 
       update();
+    }
+  }
+
+  static final class Square {
+    private final int row;
+    private final int column;
+    private Squares type = Squares.BLANK;
+    private int nearbyMines;
+    private boolean mine;
+
+    Square(int row, int column) {
+      this.row = row;
+      this.column = column;
+    }
+
+    void expose() {
+      type = Squares.EXPOSED;
+    }
+
+    boolean isBlank() {
+      return type == Squares.BLANK;
+    }
+
+    boolean isExposed() {
+      return type == Squares.EXPOSED;
+    }
+
+    boolean isFlagged() {
+      return type == Squares.FLAG;
+    }
+
+    boolean tripMine() {
+      if (mine) {
+        type = Squares.HITMINE;
+      }
+
+      return mine;
+    }
+
+    boolean toggleFlag() {
+      boolean changed = true;
+
+      if (type == Squares.FLAG) {
+        type = Squares.BLANK;
+      } else if (type == Squares.BLANK) {
+        type = Squares.FLAG;
+      } else {
+        changed = false;
+      }
+
+      return changed;
+    }
+
+    void revealOnLose() {
+      if (mine && type != Squares.HITMINE) {
+        type = Squares.MINE;
+      } else if (type == Squares.FLAG) {
+        type = Squares.WRONGMINE;
+      }
+    }
+  }
+
+  public class Cursor {
+    private int row;
+    private int column;
+
+    Cursor(int row, int column) {
+      this.row = row;
+      this.column = column;
+    }
+
+    public void moveTo(int row, int column) {
+      this.row = row;
+      this.column = column;
+    }
+
+    public int getRow() {
+      return row;
+    }
+
+    public boolean isRevealable() {
+      return !isGameOver() && table[row][column].isBlank();
+    }
+
+    public int getColumn() {
+      return column;
+    }
+
+    public Squares getType() {
+      return table[row][column].type;
+    }
+
+    public int getNearbyMineCount() {
+      return table[row][column].nearbyMines;
+    }
+
+    public void toggleFlag() {
+      if (isGameOver()) {
+        return;
+      }
+
+      if (!isGameOver() && table[row][column].toggleFlag()) {
+        update();
+      }
+    }
+
+    public void revealNearby() {
+      Minefield.this.revealNearby(table[row][column]);
+    }
+
+    public void reveal() {
+      Minefield.this.reveal(table[row][column]);
     }
   }
 

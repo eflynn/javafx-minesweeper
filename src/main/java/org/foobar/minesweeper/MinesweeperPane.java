@@ -31,14 +31,12 @@ import javafx.scene.layout.PaneBuilder;
 import org.foobar.minesweeper.model.Minefield;
 import org.foobar.minesweeper.events.ChangeHandler;
 import org.foobar.minesweeper.model.Minefield.State;
-import org.foobar.minesweeper.model.Square;
+import org.foobar.minesweeper.model.Minefield.Cursor;
 import org.foobar.minesweeper.model.Squares;
 
 public final class MinesweeperPane implements HasParent {
   private final Parent root;
   private final Label status;
-  private final int rows;
-  private final int columns;
   private final Minefield field;
   private final FieldCanvas canvas;
   private final Minesweeper appController;
@@ -50,9 +48,6 @@ public final class MinesweeperPane implements HasParent {
   public MinesweeperPane(final Minefield field, final Minesweeper appController) {
     this.field = field;
     this.appController = appController;
-
-    rows = field.getRowCount();
-    columns = field.getColumnCount();
 
     canvas = new FieldCanvas();
     canvas.setLayoutX(14);
@@ -133,7 +128,8 @@ public final class MinesweeperPane implements HasParent {
   }
 
   private void onCanvasClicked(MouseEvent event) {
-    Square square = findSquare(event);
+    Point point = asPoint(event);
+    Minefield.Cursor cursor = field.cursor(point.row, point.column);
     int clicks = event.getClickCount();
     MouseButton button = event.getButton();
 
@@ -141,30 +137,29 @@ public final class MinesweeperPane implements HasParent {
 
     if (button == MouseButton.MIDDLE
         || (clicks == 2 && button == MouseButton.PRIMARY)) {
-      square.revealNearby();
+      cursor.revealNearby();
     } else if (clicks == 1 && button == MouseButton.PRIMARY) {
       canvas.clearSelection();
-      square.reveal();
+      cursor.reveal();
     }
   }
 
   private void onCanvasPressed(MouseEvent event) {
-    Square square = findSquare(event);
-    int row = square.getRow();
-    int column = square.getColumn();
+    Point point = asPoint(event);
+    Minefield.Cursor cursor = field.cursor(point.row, point.column);
 
     if (event.isSecondaryButtonDown()) {
-      square.toggleFlag();
-    } else if (event.isPrimaryButtonDown() && square.isRevealable()) {
-      canvas.setSelection(row, column);
+      cursor.toggleFlag();
+    } else if (event.isPrimaryButtonDown() && cursor.isRevealable()) {
+      canvas.setSelection(point.row, point.column);
     }
   }
 
-  private void drawSquare(Square square) {
-    Image image = square.getType() == Squares.EXPOSED ? Tiles.getDigit(square
-        .getMineCount()) : Tiles.getImage(square.getType());
+  private void drawSquare(Cursor cursor) {
+    Image image = cursor.getType() == Squares.EXPOSED ? Tiles.getDigit(cursor
+        .getNearbyMineCount()) : Tiles.getImage(cursor.getType());
 
-    canvas.drawImage(square.getRow(), square.getColumn(), image);
+    canvas.drawImage(cursor.getRow(), cursor.getColumn(), image);
   }
 
   private void updateText(Minefield.State state) {
@@ -185,16 +180,29 @@ public final class MinesweeperPane implements HasParent {
   }
 
   private void drawBoard() {
-    for (int row = 0; row < rows; row++) {
-      for (int column = 0; column < columns; column++) {
-        drawSquare(field.getSquare(row, column));
+    Minefield.Cursor cursor = field.cursor();
+
+    for (int r = 0; r < field.getRowCount(); r++) {
+      for (int c = 0; c < field.getColumnCount(); c++) {
+        cursor.moveTo(r, c);
+        drawSquare(cursor);
       }
     }
   }
 
-  private Square findSquare(MouseEvent event) {
-    return field.getSquare(canvas.scaleRow(event.getY()),
-        canvas.scaleColumn(event.getX()));
+  static final class Point {
+    final int row;
+    final int column;
+
+    Point(int row, int column) {
+      this.row = row;
+      this.column = column;
+    }
+  }
+
+  private Point asPoint(MouseEvent event) {
+    return new Point(canvas.scaleRow(event.getY()),
+                     canvas.scaleColumn(event.getX()));
   }
 
 
