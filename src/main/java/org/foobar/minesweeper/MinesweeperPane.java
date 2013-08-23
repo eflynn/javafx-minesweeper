@@ -36,7 +36,7 @@ import org.foobar.minesweeper.model.Minefield.State;
 import org.foobar.minesweeper.model.Minefield.Cursor;
 import org.foobar.minesweeper.model.Squares;
 
-public final class MinesweeperPane implements HasParent {
+public final class MinesweeperPane implements HasParent, ChangeHandler {
   private final Parent root;
   private final Label status;
   private final Minefield field;
@@ -113,12 +113,26 @@ public final class MinesweeperPane implements HasParent {
 
     Draggable.makeDraggable(root);
 
-    field.addChangeHandler(new ChangeHandler() {
-      @Override public void onUpdate() {
-        drawBoard();
-        updateText(field.getState());
-      }
-    });
+    field.addChangeHandler(this);
+  }
+
+  @Override public void onUpdate() {
+    drawBoard();
+
+    String text;
+
+    switch(field.getState()) {
+    case LOST:
+      text = "You lost! Click New Game to try again.";
+      break;
+    case WON:
+      text = "Congratulations, you won!";
+      break;
+    default:
+      text = "";
+    }
+
+    status.setText(text);
   }
 
   public Parent asParent() {
@@ -153,23 +167,6 @@ public final class MinesweeperPane implements HasParent {
     } else if (e.isPrimaryButtonDown() && cursor.isRevealable()) {
       canvas.setSelection(point.row, point.column);
     }
-  }
-
-  private void updateText(Minefield.State state) {
-    String text;
-
-    switch(state) {
-    case LOST:
-      text = "You lost! Click New Game to try again.";
-      break;
-    case WON:
-      text = "Congratulations, you won!";
-      break;
-    default:
-      text = "";
-    }
-
-    status.setText(text);
   }
 
   private void drawBoard() {
