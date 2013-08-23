@@ -38,17 +38,23 @@ import org.foobar.minesweeper.model.Minefield;
  *
  */
 public class Minesweeper extends Application {
-  private final Pane canvas = new Pane();
-  private final ScrollPane sPane = new ScrollPane();
+  private static final String BUTTON_TITLE = "New Minesweeper";
+  private static final String PANE_TITLE = "Minesweeper";
+
+  private Pane canvas;
+  private ScrollPane sPane;
   private boolean spawnMode;
+  private Button newButton;
 
   public Minesweeper() {
   }
 
   @Override public void start(Stage stage) {
-    Button button = new Button("New Minesweeper");
+    canvas = new Pane();
+    newButton = new Button(BUTTON_TITLE);
+    sPane = new ScrollPane();
 
-    button.setOnAction(new EventHandler<ActionEvent>() {
+    newButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override public void handle(ActionEvent event) {
         onNewMinesweeper();
       }
@@ -63,7 +69,7 @@ public class Minesweeper extends Application {
     HBox box = new HBox();
     box.setPadding(new Insets(15, 12, 15, 12));
     box.setStyle("-fx-background-color: #336699;");
-    box.getChildren().add(button);
+    box.getChildren().add(newButton);
 
     BorderPane bpane = new BorderPane();
     sPane.setContent(canvas);
@@ -73,10 +79,15 @@ public class Minesweeper extends Application {
     bpane.setTop(box);
     bpane.setCenter(sPane);
 
-    stage.setTitle("JavaFX Minesweeper");
+    stage.setTitle(PANE_TITLE);
     stage.setScene(new Scene(bpane, 600, 600));
 
     stage.show();
+  }
+
+  @Override public void stop() {
+    newButton.setOnAction(null);
+    sPane.setOnMouseClicked(null);
   }
 
   private void onPaneClicked(double x, double y) {
