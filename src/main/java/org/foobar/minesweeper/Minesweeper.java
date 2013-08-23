@@ -112,4 +112,8 @@ public class Minesweeper extends Application {
     spawnMode = true;
     sPane.setCursor(Cursor.CROSSHAIR);
   }
+
+  public static void main(String[] args) {
+    Application.launch(args);
+  }
 }
