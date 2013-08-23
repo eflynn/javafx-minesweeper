@@ -155,13 +155,6 @@ public final class MinesweeperPane implements HasParent {
     }
   }
 
-  private void drawSquare(Cursor cursor) {
-    Image image = cursor.getType() == Squares.EXPOSED ? Tiles.getDigit(cursor
-        .getNearbyMineCount()) : Tiles.getImage(cursor.getType());
-
-    canvas.drawImage(image);
-  }
-
   private void updateText(Minefield.State state) {
     String text;
 
@@ -186,7 +179,7 @@ public final class MinesweeperPane implements HasParent {
       for (int c = 0; c < field.getColumnCount(); c++) {
         cursor.moveTo(r, c);
         canvas.setLocation(r, c);
-        drawSquare(cursor);
+        canvas.drawImage(Tiles.getImage(cursor));
       }
     }
   }
@@ -205,6 +198,4 @@ public final class MinesweeperPane implements HasParent {
     return new Point(canvas.scaleRow(event.getY()),
                      canvas.scaleColumn(event.getX()));
   }
-
-
 }

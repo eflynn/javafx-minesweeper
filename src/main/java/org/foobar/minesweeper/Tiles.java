@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkPositionIndex;
 import javafx.scene.image.Image;
 
 import org.foobar.minesweeper.model.Squares;
+import org.foobar.minesweeper.model.Minefield.Cursor;
 
 public class Tiles {
   private static final String baseDir = "/resources/";
@@ -42,8 +43,16 @@ public class Tiles {
   private Tiles() {
   }
 
-  public static Image getImage(Squares square) {
-    switch (square) {
+  public static Image getImage(Cursor cursor) {
+    int mines = cursor.getNearbyMineCount();
+
+    if (mines > 0) {
+      checkPositionIndex(mines, 8);
+
+      return digits[mines];
+    }
+
+    switch (cursor.getType()) {
     case BLANK:
       return Tiles.BLANK;
     case FLAG:
@@ -57,14 +66,8 @@ public class Tiles {
     case WRONGMINE:
       return Tiles.WRONGMINE;
     default:
-      throw new AssertionError("Unknown square type: " + square);
+      throw new AssertionError("Unknown square type: " + cursor.getType());
     }
-  }
-
-  public static Image getDigit(int index) {
-    checkPositionIndex(index, 8);
-
-    return digits[index];
   }
 
   private static Image loadImage(String path) {
