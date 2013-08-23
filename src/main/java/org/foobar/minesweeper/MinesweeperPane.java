@@ -23,7 +23,9 @@ import javafx.scene.control.ButtonBuilder;
 import javafx.scene.control.Label;
 import javafx.scene.control.LabelBuilder;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseButton;
+import static javafx.scene.input.MouseButton.PRIMARY;
+import static javafx.scene.input.MouseButton.MIDDLE;
+
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBoxBuilder;
 import javafx.scene.layout.PaneBuilder;
@@ -127,30 +129,28 @@ public final class MinesweeperPane implements HasParent {
     field.reset();
   }
 
-  private void onCanvasClicked(MouseEvent event) {
-    Point point = asPoint(event);
+  private void onCanvasClicked(MouseEvent e) {
+    Point point = asPoint(e);
     Minefield.Cursor cursor = field.cursor(point.row, point.column);
-    int clicks = event.getClickCount();
-    MouseButton button = event.getButton();
 
     // FIXME: square doesn't always redraw after mouse click
 
-    if (button == MouseButton.MIDDLE
-        || (clicks == 2 && button == MouseButton.PRIMARY)) {
+    if (e.getButton() == MIDDLE
+        || (e.getClickCount() == 2 && e.getButton() == PRIMARY)) {
       cursor.revealNearby();
-    } else if (clicks == 1 && button == MouseButton.PRIMARY) {
+    } else if (e.getClickCount() == 1 && e.getButton() == PRIMARY) {
       canvas.clearSelection();
       cursor.reveal();
     }
   }
 
-  private void onCanvasPressed(MouseEvent event) {
-    Point point = asPoint(event);
+  private void onCanvasPressed(MouseEvent e) {
+    Point point = asPoint(e);
     Minefield.Cursor cursor = field.cursor(point.row, point.column);
 
-    if (event.isSecondaryButtonDown()) {
+    if (e.isSecondaryButtonDown()) {
       cursor.toggleFlag();
-    } else if (event.isPrimaryButtonDown() && cursor.isRevealable()) {
+    } else if (e.isPrimaryButtonDown() && cursor.isRevealable()) {
       canvas.setSelection(point.row, point.column);
     }
   }
