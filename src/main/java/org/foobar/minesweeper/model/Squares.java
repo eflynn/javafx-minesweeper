@@ -17,5 +17,17 @@
 package org.foobar.minesweeper.model;
 
 public enum Squares {
-  BLANK, FLAG, MINE, HITMINE, WRONGMINE, EXPOSED
+  BLANK, FLAG, MINE, HITMINE, WRONGMINE, EXPOSED;
+
+  public boolean isBlank() {
+    return this == BLANK;
+  }
+
+  public boolean isExposed() {
+    return this == EXPOSED;
+  }
+
+  public boolean isFlagged() {
+    return this == FLAG;
+  }
 }

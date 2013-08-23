@@ -159,7 +159,7 @@ public final class Minefield {
   }
 
   private void reveal(Square square) {
-    if (isGameOver() || !square.isBlank()) {
+    if (isGameOver() || !square.type.isBlank()) {
       return;
     }
 
@@ -175,7 +175,7 @@ public final class Minefield {
   }
 
   private void revealNearby(Square source) {
-    if (isGameOver() || source.isExposed()) {
+    if (isGameOver() || source.type.isExposed()) {
       return;
     }
 
@@ -183,7 +183,7 @@ public final class Minefield {
     int nearbyFlags = 0;
 
     for (Square square : neighbors) {
-      if (square.isFlagged()) {
+      if (square.type.isFlagged()) {
         nearbyFlags++;
       }
     }
@@ -257,7 +257,7 @@ public final class Minefield {
 
     if (source.nearbyMines == 0) {
       for (Square square : findNeighbors(source)) {
-        if (!square.isExposed()) {
+        if (!square.type.isExposed()) {
           exposed += visit(square);
         }
       }
@@ -317,18 +317,6 @@ public final class Minefield {
       type = Squares.EXPOSED;
     }
 
-    boolean isBlank() {
-      return type == Squares.BLANK;
-    }
-
-    boolean isExposed() {
-      return type == Squares.EXPOSED;
-    }
-
-    boolean isFlagged() {
-      return type == Squares.FLAG;
-    }
-
     boolean tripMine() {
       if (mine) {
         type = Squares.HITMINE;
@@ -379,7 +367,7 @@ public final class Minefield {
     }
 
     public boolean isRevealable() {
-      return !isGameOver() && table[row][column].isBlank();
+      return !isGameOver() && table[row][column].type.isBlank();
     }
 
     public int getColumn() {
