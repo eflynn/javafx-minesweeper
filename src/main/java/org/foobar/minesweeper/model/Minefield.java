@@ -383,10 +383,6 @@ public final class Minefield {
     }
 
     public void toggleFlag() {
-      if (isGameOver()) {
-        return;
-      }
-
       if (!isGameOver() && table[row][column].toggleFlag()) {
         update();
       }
