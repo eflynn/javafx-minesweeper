@@ -21,17 +21,25 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public class FieldCanvas extends Canvas {
+  public static final double SQUAREW = 24.0;
+  public static final double SQUAREH = 24.0;
+
   private final SelectionModel select = new SelectionModel();
-  public static final int SQUAREW = 24;
-  public static final int SQUAREH = 24;
+  private double translateX = 0.0;
+  private double translateY = 0.0;
+
+  public FieldCanvas() {
+  }
 
   public void setSelection(int row, int column) {
-    drawImage(row, column, Tiles.EXPOSED);
+    setLocation(row, column);
+    drawImage(Tiles.EXPOSED);
     select.select(row, column);
   }
 
   public void clearSelection() {
-    drawImage(select.getRow(), select.getColumn(), Tiles.BLANK);
+    setLocation(select.getRow(), select.getColumn());
+    drawImage(Tiles.BLANK);
     select.clear();
   }
 
@@ -43,9 +51,12 @@ public class FieldCanvas extends Canvas {
     return (int) (x / SQUAREW);
   }
 
+  public void setLocation(int row, int column) {
+    translateX = column * SQUAREW;
+    translateY = row * SQUAREH;
+  }
 
-  public void drawImage(int row, int column, Image image) {
-    GraphicsContext gc = getGraphicsContext2D();
-    gc.drawImage(image, column * SQUAREW, row * SQUAREH);
+  public void drawImage(Image image) {
+    getGraphicsContext2D().drawImage(image, translateX, translateY);
   }
 }
