@@ -48,16 +48,10 @@ public class Minesweeper extends Application {
   @Override public void start(Stage stage) {
     Button button = new Button("New Minesweeper");
 
-    button.setOnAction(new EventHandler<ActionEvent>() {
-      @Override public void handle(ActionEvent event) {
-        onNewMinesweeper();
-      }
-    });
+    button.setOnAction(event -> onNewMinesweeper());
 
-    sPane.setOnMouseClicked(new EventHandler<MouseEvent>() {
-      @Override public void handle(MouseEvent event) {
-        onPaneClicked(event.getX(), event.getY());
-      }
+    sPane.setOnMouseClicked(event -> {
+      onPaneClicked(event.getX(), event.getY());
     });
 
     HBox box = new HBox();

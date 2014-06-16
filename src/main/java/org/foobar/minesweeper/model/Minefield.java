@@ -85,11 +85,7 @@ public final class Minefield {
 
     updateBoard();
 
-    return new HandlerRegistration() {
-      @Override public void removeHandler() {
-        handlers.remove(handler);
-      }
-    };
+    return () -> handlers.remove(handler);
   }
 
   /**
@@ -314,6 +310,6 @@ public final class Minefield {
     /** The game was reset. */
     START,
     /** The game has been won. */
-    WON;
+    WON
   }
 }

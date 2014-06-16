@@ -59,17 +59,10 @@ public final class MinesweeperPane implements HasParent {
     canvas.setLayoutY(49.0);
     canvas.setWidth(240);
     canvas.setHeight(240);
-    canvas.setOnMouseClicked(new EventHandler<MouseEvent>() {
-      public void handle(MouseEvent event) {
-        onCanvasClicked(event);
-      }
-    });
 
-    canvas.setOnMousePressed(new EventHandler<MouseEvent>() {
-      public void handle(MouseEvent event) {
-        onCanvasPressed(event);
-      }
-    });
+    canvas.setOnMouseClicked(event -> onCanvasClicked(event));
+
+    canvas.setOnMousePressed(event -> onCanvasPressed(event));
 
     root = PaneBuilder.create()
         .style("-fx-border-color: black;"
@@ -87,25 +80,13 @@ public final class MinesweeperPane implements HasParent {
             .children(
                 ButtonBuilder.create()
                 .text("_New Game")
-                .onAction(new EventHandler<ActionEvent>() {
-                  @Override public void handle(ActionEvent event) {
-                    onNewGame();
-                  }
-                }).build(),
+                .onAction(event -> onNewGame()).build(),
                 ButtonBuilder.create()
                 .text("C_lone")
-                .onAction(new EventHandler<ActionEvent>() {
-                  @Override public void handle(ActionEvent event) {
-                    appController.onClone(MinesweeperPane.this);
-                  }
-                }).build(),
+                .onAction(event -> appController.onClone(MinesweeperPane.this)).build(),
                 ButtonBuilder.create()
                 .text("_Close")
-                .onAction(new EventHandler<ActionEvent>() {
-                  @Override public void handle(ActionEvent event) {
-                    appController.onClose(MinesweeperPane.this);
-                  }
-                }).build()
+                .onAction(event -> appController.onClone(MinesweeperPane.this)).build()
             ).build(),
          canvas,
          status = LabelBuilder.create()
