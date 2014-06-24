@@ -60,9 +60,9 @@ public final class MinesweeperPane implements HasParent {
     canvas.setWidth(240);
     canvas.setHeight(240);
 
-    canvas.setOnMouseClicked(event -> onCanvasClicked(event));
+    canvas.setOnMouseClicked(this::onCanvasClicked);
 
-    canvas.setOnMousePressed(event -> onCanvasPressed(event));
+    canvas.setOnMousePressed(this::onCanvasPressed);
 
     root = PaneBuilder.create()
         .style("-fx-border-color: black;"

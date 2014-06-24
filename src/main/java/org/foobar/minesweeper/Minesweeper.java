@@ -18,7 +18,6 @@ package org.foobar.minesweeper;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
@@ -48,11 +47,9 @@ public class Minesweeper extends Application {
   @Override public void start(Stage stage) {
     Button button = new Button("New Minesweeper");
 
-    button.setOnAction(event -> onNewMinesweeper());
+    button.setOnAction(this::onNewMinesweeper);
 
-    sPane.setOnMouseClicked(event -> {
-      onPaneClicked(event.getX(), event.getY());
-    });
+    sPane.setOnMouseClicked(this::onPaneClicked);
 
     HBox box = new HBox();
     box.setPadding(new Insets(15, 12, 15, 12));
@@ -73,14 +70,14 @@ public class Minesweeper extends Application {
     stage.show();
   }
 
-  private void onPaneClicked(double x, double y) {
+  private void onPaneClicked(MouseEvent event) {
     if (!spawnMode)
       return;
 
     Minefield minefield = new Minefield(10, 10, 10);
 
     MinesweeperPane minesweeper = new MinesweeperPane(minefield, this);
-    minesweeper.asParent().relocate(x, y);
+    minesweeper.asParent().relocate(event.getX(), event.getY());
     minesweeper.asParent().requestFocus();
 
     canvas.getChildren().add(minesweeper.asParent());
@@ -102,7 +99,7 @@ public class Minesweeper extends Application {
     canvas.getChildren().remove(toClose.asParent());
   }
 
-  private void onNewMinesweeper() {
+  private void onNewMinesweeper(ActionEvent event) {
     spawnMode = true;
     sPane.setCursor(Cursor.CROSSHAIR);
   }
