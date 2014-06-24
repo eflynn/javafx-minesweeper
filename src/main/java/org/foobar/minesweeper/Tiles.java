@@ -22,7 +22,6 @@ import javafx.scene.image.Image;
 import org.foobar.minesweeper.model.Squares;
 
 public class Tiles {
-  private static final String baseDir = "/resources/";
   public static final Image BLANK = loadImage("blank.png");
   public static final Image FLAG = loadImage("flag.png");
   public static final Image EXPOSED = loadImage("exposed.png");
@@ -68,6 +67,6 @@ public class Tiles {
   }
 
   private static Image loadImage(String path) {
-    return new Image(baseDir + path);
+    return new Image(Tiles.class.getResourceAsStream("/" + path));
   }
 }
