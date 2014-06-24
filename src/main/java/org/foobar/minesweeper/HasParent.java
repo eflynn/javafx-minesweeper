@@ -18,6 +18,7 @@ package org.foobar.minesweeper;
 
 import javafx.scene.Parent;
 
+@FunctionalInterface
 public interface HasParent {
   Parent asParent();
 }

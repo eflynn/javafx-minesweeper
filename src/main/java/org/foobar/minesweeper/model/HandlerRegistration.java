@@ -19,6 +19,7 @@ package org.foobar.minesweeper.model;
 /**
  * Use the handler registration to remove handlers when they are no longer needed.
  */
+@FunctionalInterface
 public interface HandlerRegistration {
   /**
    * Removes the given handler from the object it was attached to.
