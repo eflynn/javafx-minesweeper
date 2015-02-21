@@ -184,6 +184,4 @@ public final class MinesweeperPane implements HasParent {
     return field.getSquare(canvas.scaleRow(event.getY()),
         canvas.scaleColumn(event.getX()));
   }
-
-
 }

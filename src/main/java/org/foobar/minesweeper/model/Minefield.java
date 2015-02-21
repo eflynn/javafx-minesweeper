@@ -212,9 +212,7 @@ public final class Minefield {
   }
 
   void updateBoard() {
-    for (FieldHandler handler : handlers) {
-      handler.updateBoard();
-    }
+    handlers.forEach(FieldHandler::updateBoard);
   }
 
   private void cascade(Square start) {
@@ -223,9 +221,7 @@ public final class Minefield {
     unrevealed -= exposed;
 
     if (unrevealed == 0) {
-      for(Square square : mineSet) {
-        square.onGameWon();
-      }
+      mineSet.forEach(Square::onGameWon);
 
       setState(State.WON);
       updateBoard();
@@ -257,9 +253,7 @@ public final class Minefield {
     for(Square square : mineSet) {
       square.setMine(true);
 
-      for (Square neighbor : findNeighbors(square)) {
-        neighbor.addNearbyMine();
-      }
+      findNeighbors(square).forEach(Square::addNearbyMine);
     }
   }
 

@@ -131,18 +131,14 @@ public class Square {
     }
 
     List<Square> neighbors = minefield.findNeighbors(this);
-    int nearbyFlags = 0;
 
-    for (Square square : neighbors) {
-      if (square.type == Squares.FLAG) {
-        nearbyFlags++;
-      }
-    }
+    int nearbyFlags = neighbors.stream()
+            .filter(square -> square.type == Squares.FLAG)
+            .mapToInt(e -> 1)
+            .sum();
 
     if (nearbyFlags == nearbyMines) {
-      for (Square square : neighbors) {
-        square.reveal();
-      }
+      neighbors.forEach(Square::reveal);
     }
   }
 
